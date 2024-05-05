@@ -1,0 +1,10 @@
+[run]
+branch = True
+omit = tests/*
+
+[html]
+directory = tests/coverage
+
+[report]
+fail_under = 80
+skip_empty = True
