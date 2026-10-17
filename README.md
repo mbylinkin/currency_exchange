@@ -34,11 +34,11 @@ Installs all project dependencies
 ### Run server
 
 ```bash
-make run-prod
+make run-dev
 ```
-This command:
+This command (`make run-prod` does the same):
 * creates database if it doesn't exist
-* create tables if they don't exist
+* applies migrations (`make migrate`), so tables are created or updated
 * starts web application server
 
 ### Use application

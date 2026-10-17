@@ -19,8 +19,9 @@ python -m playwright install chromium   # for e2e; or reuse an installed browser
 pre-commit install
 cp .env.example .env                    # only for running the app; tests set their env in pytest.ini
 
-make run-dev                      # python run.py (uvicorn, reload=True)
-make run-prod                     # alembic upgrade head, then run.py
+make migrate                      # alembic upgrade head (also run by run-dev/run-prod)
+make run-dev                      # migrate, then python run.py (uvicorn, reload=True)
+make run-prod                     # same as run-dev for now
 make frontend                     # spec's reference frontend on :8080 -> API on :8000
 make lint                         # ruff check + ruff format on src, tests, e2e
 make test                         # unit/integration tests (tests/ only)
