@@ -56,7 +56,7 @@ def test_exchange_currency_rate_not_found(
     resp_json = resp.json()
 
     assert resp.status_code == status.HTTP_404_NOT_FOUND
-    assert resp_json["detail"] == "Exchange rate for currency pair not found"
+    assert resp_json["message"] == "Exchange rate for currency pair not found"
 
 
 def test_exchange_currency_not_found(
@@ -69,4 +69,4 @@ def test_exchange_currency_not_found(
     resp_json = resp.json()
 
     assert resp.status_code == status.HTTP_404_NOT_FOUND
-    assert resp_json["detail"] == "Exchange rate for currency pair not found"
+    assert resp_json["message"] == "Exchange rate for currency pair not found"

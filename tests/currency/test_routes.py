@@ -40,7 +40,7 @@ def test_add_currency_already_exists(
     resp_json = resp.json()
 
     assert resp.status_code == status.HTTP_409_CONFLICT
-    assert resp_json["detail"] == "Currency with this code already exists"
+    assert resp_json["message"] == "Currency with this code already exists"
 
 
 def test_get_currency_empty_code(app_client: TestClient) -> None:
@@ -48,7 +48,7 @@ def test_get_currency_empty_code(app_client: TestClient) -> None:
     resp_json = resp.json()
 
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
-    assert resp_json["detail"] == "Currency code is required"
+    assert resp_json["message"] == "Currency code is required"
 
 
 def test_get_currency_by_code(
@@ -75,7 +75,7 @@ def test_get_currency_by_code_not_found(app_client: TestClient) -> None:
     resp_json = resp.json()
 
     assert resp.status_code == status.HTTP_404_NOT_FOUND
-    assert resp_json["detail"] == "Currency not found"
+    assert resp_json["message"] == "Currency not found"
 
 
 def test_get_currencies(app_client: TestClient, create_currency_eur: Currency) -> None:

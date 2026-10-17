@@ -107,7 +107,7 @@ def test_get_exchange_rate_by_code_not_found(
     resp_json = resp.json()
 
     assert resp.status_code == status.HTTP_404_NOT_FOUND
-    assert resp_json["detail"] == "Exchange rate not found"
+    assert resp_json["message"] == "Exchange rate not found"
 
 
 def test_get_exchange_rate_empty_code(app_client: TestClient) -> None:
@@ -115,7 +115,7 @@ def test_get_exchange_rate_empty_code(app_client: TestClient) -> None:
     resp_json = resp.json()
 
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
-    assert resp_json["detail"] == "Exchange rate code is required"
+    assert resp_json["message"] == "Exchange rate code is required"
 
 
 def test_update_exchange_rate(
