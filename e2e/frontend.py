@@ -18,12 +18,25 @@ FRONTEND_DIR = Path(__file__).parent / "frontend"
 FRONTEND_API_HOST = "http://localhost:8080/currency_exchange_war_exploded"
 
 
-def fetch_frontend(target: Path = FRONTEND_DIR) -> Path:
-    if not (target / "index.html").exists():
-        subprocess.run(["git", "clone", "-q", FRONTEND_REPO, str(target)], check=True)
-    subprocess.run(
-        ["git", "-C", str(target), "checkout", "-q", FRONTEND_COMMIT], check=True
+def fetch_frontend(target: Path = FRONTEND_DIR, commit: str = FRONTEND_COMMIT) -> Path:
+    """Check out `commit` into `target`, downloading it only if it's missing.
+
+    `target` is a managed checkout: local edits there are discarded.
+    """
+    git = ["git", "-C", str(target)]
+    if not (target / ".git").exists():
+        target.mkdir(parents=True, exist_ok=True)
+        subprocess.run([*git, "init", "-q"], check=True)
+        subprocess.run([*git, "remote", "add", "origin", FRONTEND_REPO], check=True)
+
+    has_commit = subprocess.run(
+        [*git, "cat-file", "-e", f"{commit}^{{commit}}"], capture_output=True
     )
+    if has_commit.returncode != 0:
+        subprocess.run(
+            [*git, "fetch", "-q", "--depth", "1", "origin", commit], check=True
+        )
+    subprocess.run([*git, "checkout", "-q", "--force", commit], check=True)
     return target
 
 
