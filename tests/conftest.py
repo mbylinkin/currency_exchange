@@ -1,11 +1,15 @@
-from typing import Any, Generator, Iterable
+from collections.abc import Generator, Iterable
+from typing import Any
+
 import pytest
-from sqlalchemy_utils import create_database, database_exists
-from src.models import Base
-from src.database import create_session
-from sqlalchemy.orm import Session
 from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
+from sqlalchemy_utils import create_database, database_exists
+
+from src.database import create_session
 from src.main import app
+from src.models import Base
+
 from .factories import CurrencyFactory, ExchangeRateFactory
 
 

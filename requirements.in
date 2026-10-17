@@ -1,0 +1,26 @@
+# Direct dependencies. requirements.txt is generated from this file:
+#   uv pip compile requirements.in -o requirements.txt --universal --python-version 3.14
+
+# App
+fastapi
+uvicorn
+pydantic
+pydantic-settings
+sqlalchemy
+alembic
+python-multipart
+
+# Tests
+pytest
+pytest-cov
+pytest-sugar
+pytest-env
+httpx2
+factory-boy
+sqlalchemy-utils
+playwright
+pytest-playwright
+
+# Tooling
+ruff
+pre-commit

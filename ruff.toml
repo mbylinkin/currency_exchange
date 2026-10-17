@@ -1,0 +1,8 @@
+[lint.flake8-bugbear]
+# FastAPI declares request parameters through calls in argument defaults
+extend-immutable-calls = [
+    "fastapi.Depends",
+    "fastapi.Form",
+    "fastapi.Query",
+    "fastapi.params.Query",
+]

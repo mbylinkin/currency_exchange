@@ -6,7 +6,6 @@ from fastapi.params import Query
 from src.exchange import schemas
 from src.exchange.service import exc_currency
 
-
 router = APIRouter()
 
 

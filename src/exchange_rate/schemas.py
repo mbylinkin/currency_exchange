@@ -1,7 +1,9 @@
 from decimal import Decimal
 from typing import Self
+
 from fastapi import Form
-from pydantic import AliasChoices, BaseModel, Field, field_serializer
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field, field_serializer
+
 from src.currency.schemas import Currency
 
 
@@ -46,8 +48,7 @@ class ExchangeRate(ExchangeRateBase):
         validation_alias=AliasChoices("target_currency", "targetCurrency"),
     )
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ExchangeRateUpdate(ExchangeRateBase):

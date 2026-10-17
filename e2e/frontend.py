@@ -30,7 +30,9 @@ def fetch_frontend(target: Path = FRONTEND_DIR, commit: str = FRONTEND_COMMIT) -
         subprocess.run([*git, "remote", "add", "origin", FRONTEND_REPO], check=True)
 
     has_commit = subprocess.run(
-        [*git, "cat-file", "-e", f"{commit}^{{commit}}"], capture_output=True
+        [*git, "cat-file", "-e", f"{commit}^{{commit}}"],
+        capture_output=True,
+        check=False,
     )
     if has_commit.returncode != 0:
         subprocess.run(

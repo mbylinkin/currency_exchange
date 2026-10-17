@@ -26,10 +26,16 @@ Creates .env file from .env.example
 
 ### Install dependencies
 
+Requires Python 3.14.
+
 ```bash
 pip install -r requirements.txt
 ```
-Installs all project dependencies
+Installs all project dependencies, pinned in `requirements.txt`. To add or upgrade a dependency, edit `requirements.in` and regenerate the lock with [uv](https://docs.astral.sh/uv/):
+
+```bash
+uv pip compile requirements.in -o requirements.txt --universal --python-version 3.14
+```
 
 ### Run server
 

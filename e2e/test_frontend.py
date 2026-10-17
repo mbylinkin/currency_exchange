@@ -1,14 +1,14 @@
-import httpx
+import httpx2
 import pytest
 from playwright.sync_api import Page, expect
 
 
-def seed_currency(api: httpx.Client, code: str, name: str, sign: str) -> None:
+def seed_currency(api: httpx2.Client, code: str, name: str, sign: str) -> None:
     resp = api.post("/currencies", data={"code": code, "name": name, "sign": sign})
     resp.raise_for_status()
 
 
-def seed_rate(api: httpx.Client, base: str, target: str, rate: str) -> None:
+def seed_rate(api: httpx2.Client, base: str, target: str, rate: str) -> None:
     resp = api.post(
         "/exchangeRates",
         data={"baseCurrencyCode": base, "targetCurrencyCode": target, "rate": rate},
@@ -17,7 +17,7 @@ def seed_rate(api: httpx.Client, base: str, target: str, rate: str) -> None:
 
 
 @pytest.fixture()
-def usd_eur_gbp(api: httpx.Client) -> None:
+def usd_eur_gbp(api: httpx2.Client) -> None:
     seed_currency(api, "USD", "US Dollar", "$")
     seed_currency(api, "EUR", "Euro", "€")
     seed_currency(api, "GBP", "Pound Sterling", "£")
@@ -47,7 +47,7 @@ def test_page_shows_currencies_and_rates(
     assert page_errors == []
 
 
-def test_add_currency(page: Page, frontend: str, api: httpx.Client) -> None:
+def test_add_currency(page: Page, frontend: str, api: httpx2.Client) -> None:
     page.goto(frontend)
 
     page.fill("#add-currency-code", "JPY")
@@ -83,7 +83,7 @@ def test_add_currency_missing_field_shows_error(page: Page, frontend: str) -> No
 
 
 def test_add_exchange_rate(
-    page: Page, frontend: str, api: httpx.Client, usd_eur_gbp: None
+    page: Page, frontend: str, api: httpx2.Client, usd_eur_gbp: None
 ) -> None:
     page.goto(frontend)
 
@@ -110,7 +110,7 @@ def test_add_duplicate_exchange_rate_shows_error(
 
 
 def test_edit_exchange_rate(
-    page: Page, frontend: str, api: httpx.Client, usd_eur_gbp: None
+    page: Page, frontend: str, api: httpx2.Client, usd_eur_gbp: None
 ) -> None:
     page.goto(frontend)
 
@@ -152,7 +152,7 @@ def test_convert(
 
 
 def test_convert_without_rate_shows_error(
-    page: Page, frontend: str, api: httpx.Client
+    page: Page, frontend: str, api: httpx2.Client
 ) -> None:
     seed_currency(api, "EUR", "Euro", "€")
     seed_currency(api, "GBP", "Pound Sterling", "£")
@@ -185,9 +185,11 @@ def test_frontend_requests_are_not_redirected(
     redirects: list[str] = []
     page.on(
         "response",
-        lambda resp: resp.url.startswith(backend_url)
-        and 300 <= resp.status < 400
-        and redirects.append(f"{resp.status} {resp.request.method} {resp.url}"),
+        lambda resp: (
+            resp.url.startswith(backend_url)
+            and 300 <= resp.status < 400
+            and redirects.append(f"{resp.status} {resp.request.method} {resp.url}")
+        ),
     )
     page.goto(frontend)
     expect(page.locator(".currencies-table tbody tr")).to_have_count(3)
