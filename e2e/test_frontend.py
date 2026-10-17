@@ -4,13 +4,12 @@ from playwright.sync_api import Page, expect
 
 # Known spec violations. strict=True fails the run once a bug is fixed,
 # so the fix must also remove its marker.
-BUG_ERROR_FORMAT = pytest.mark.xfail(
-    strict=True,
-    reason="errors are {'detail': ...}, spec and frontend read 'message'",
-)
 BUG_VALIDATION_STATUS = pytest.mark.xfail(
     strict=True,
     reason="missing/invalid fields return 422 or 500 instead of 400 with a message",
+)
+BUG_DUPLICATE_RATE_MESSAGE = pytest.mark.xfail(
+    strict=True, reason="duplicate exchange rate returns 409 with 'Server error'"
 )
 BUG_CROSS_RATE = pytest.mark.xfail(
     strict=True, reason="cross rate via USD is inverted: (USD->A) / (USD->B)"
@@ -73,7 +72,6 @@ def test_add_currency(page: Page, frontend: str, api: httpx.Client) -> None:
     assert [c["code"] for c in api.get("/currencies").json()] == ["JPY"]
 
 
-@BUG_ERROR_FORMAT
 def test_add_duplicate_currency_shows_error(
     page: Page, frontend: str, usd_eur_gbp: None
 ) -> None:
@@ -112,7 +110,7 @@ def test_add_exchange_rate(
     assert api.get("/exchangeRate/EURGBP").json()["rate"] == 0.85
 
 
-@BUG_ERROR_FORMAT
+@BUG_DUPLICATE_RATE_MESSAGE
 def test_add_duplicate_exchange_rate_shows_error(
     page: Page, frontend: str, usd_eur_gbp: None
 ) -> None:
@@ -170,7 +168,6 @@ def test_convert(
     expect(page.locator("#convert-converted-amount")).to_have_value(converted)
 
 
-@BUG_ERROR_FORMAT
 def test_convert_without_rate_shows_error(
     page: Page, frontend: str, api: httpx.Client
 ) -> None:
