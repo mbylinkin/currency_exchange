@@ -61,3 +61,24 @@ To run tests with coverage use
 make test-cov
 ```
 After running tests with coverage report will be available at [tests/coverage/index.html](tests/coverage/index.html)
+
+### End-to-end tests
+
+E2E tests drive the [reference frontend](https://github.com/zhukovsd/currency-exchange-frontend) from the spec in a browser (Playwright). They start the API and the frontend themselves, no `.env` needed.
+
+```bash
+python -m playwright install chromium
+make test-e2e
+```
+
+To use an already installed browser instead of the downloaded Chromium, run `make test-e2e E2E_ARGS="--browser-channel msedge"` (or `chrome`). Add `--headed` to watch the browser.
+
+To click through the frontend by hand, start the API (`make run-dev`) and then the frontend (`make frontend`), and open http://localhost:8080.
+
+### Pre-commit hooks
+
+```bash
+pre-commit install
+```
+
+Runs whitespace/YAML checks and ruff (lint + format) on every commit. CI runs the same hooks plus the unit and e2e tests on every pull request.
