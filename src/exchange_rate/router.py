@@ -42,7 +42,10 @@ def create_exchange_rate(
         schemas.ExchangeRateCreate.as_form
     ),
 ):
-    return add_exc_rate(exchange_rate_data)
+    try:
+        return add_exc_rate(exchange_rate_data)
+    except exceptions.AlreadyExists:
+        raise exceptions.ExcRateAlreadyExists()
 
 
 @router.patch(

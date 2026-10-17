@@ -45,7 +45,6 @@ CI (`.github/workflows/ci.yml`) runs three jobs on every PR: pre-commit (hygiene
 
 Each of these has a `xfail(strict=True)` e2e test in `e2e/test_frontend.py` (`BUG_*` markers). A fix must remove its marker: strict xfail fails the run once the bug is gone.
 
-- A duplicate exchange rate pair returns 409 with the text "Server error" (`BUG_DUPLICATE_RATE_MESSAGE`). Base `AlreadyExists` has no `DETAIL`, and the exchange rate router doesn't map it the way the currency router does.
 - The cross rate through USD is computed as (USD→A) / (USD→B), but it should be (USD→B) / (USD→A) (`BUG_CROSS_RATE`). The unit test `test_exchange_currency_rate_through_usd` pins the wrong value 0.72.
 
 Not covered by e2e yet:
@@ -59,7 +58,7 @@ Each domain package (`src/currency`, `src/exchange_rate`, `src/exchange`) has `r
 
 - `database.py` — one module-level engine (`StaticPool`, `echo=True`). Services don't use FastAPI DI for sessions. They build `select()` statements and call `fetch_one` / `fetch_all` / `upd_one`, which each open and close their own session. `upd_one` turns `IntegrityError` into `AlreadyExists` (409).
 - `models.py` — all ORM models in one file (`Currency`, `ExchangeRates`). `ExchangeRates` eagerly joins both currencies. Constraint names come from `constants.DB_NAMING_CONVENTION`. Alembic's `env.py` uses `src.models.Base.metadata` and `src.database.engine`.
-- `exceptions.py` — `DetailedHTTPException` subclasses set `STATUS_CODE`/`DETAIL` as class attributes. Domain exceptions subclass these (e.g. `CurrencyNotFound(NotFound)`) and are raised directly from services. `register_exception_handlers` (called in `main.py`) renders every `HTTPException`, including Starlette's own 404/405, as `{"message": detail}`, and any unhandled exception as `500 {"message": "Server error"}`. It also turns validation errors into `400 {"message": "Missing required field 'x'"}` / `"Invalid field 'x': ..."`. That covers FastAPI's `RequestValidationError` and the plain pydantic `ValidationError` raised when `as_form` builds a schema. Never return `{"detail": ...}`: the spec and the frontend read `message`.
+- `exceptions.py` — `DetailedHTTPException` subclasses set `STATUS_CODE`/`DETAIL` as class attributes. Domain exceptions subclass these (e.g. `CurrencyNotFound(NotFound)`) and are raised directly from services. Routers map the generic `AlreadyExists` that `upd_one` raises to a domain-specific 409 (`CurrencyAlreadyExists`, `ExcRateAlreadyExists`). `register_exception_handlers` (called in `main.py`) renders every `HTTPException`, including Starlette's own 404/405, as `{"message": detail}`, and any unhandled exception as `500 {"message": "Server error"}`. It also turns validation errors into `400 {"message": "Missing required field 'x'"}` / `"Invalid field 'x': ..."`. That covers FastAPI's `RequestValidationError` and the plain pydantic `ValidationError` raised when `as_form` builds a schema. Never return `{"detail": ...}`: the spec and the frontend read `message`.
 - `settings.py` — `AppSettings` (`APP_` prefix) and `ServerSettings` (`SERVER_` prefix), created once at import as `settings.app` / `settings.server`. `APP_CORS_ORIGINS` and `APP_CORS_HEADERS` are required.
 
 Conventions to keep:

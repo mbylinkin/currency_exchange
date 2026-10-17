@@ -1,4 +1,4 @@
-from src.exceptions import BadRequest, NotFound
+from src.exceptions import AlreadyExists, BadRequest, NotFound
 
 
 class NoExcRateCodeError(BadRequest):
@@ -7,6 +7,10 @@ class NoExcRateCodeError(BadRequest):
 
 class ExcRateNotFound(NotFound):
     DETAIL = "Exchange rate not found"
+
+
+class ExcRateAlreadyExists(AlreadyExists):
+    DETAIL = "Exchange rate for this currency pair already exists"
 
 
 class CurrencyPairExcRateNotFound(NotFound):

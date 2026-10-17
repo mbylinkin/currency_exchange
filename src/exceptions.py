@@ -26,6 +26,7 @@ class NotFound(DetailedHTTPException):
 
 class AlreadyExists(DetailedHTTPException):
     STATUS_CODE = status.HTTP_409_CONFLICT
+    DETAIL = "Already exists"
 
 
 class DatabaseError(DetailedHTTPException):
