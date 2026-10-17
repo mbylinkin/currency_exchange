@@ -44,14 +44,11 @@ CI (`.github/workflows/ci.yml`) runs three jobs on every PR: pre-commit (hygiene
 
 ## Known spec violations (open)
 
-Each of these has a `xfail(strict=True)` e2e test in `e2e/test_frontend.py` (`BUG_*` markers). A fix must remove its marker: strict xfail fails the run once the bug is gone.
+Pin a bug that is visible through the frontend with an e2e test marked by a named constant in `e2e/test_frontend.py`: `BUG_X = pytest.mark.xfail(strict=True, reason=...)`. The fix deletes the constant and its usages. Strict xfail fails the run once the bug is gone. No e2e test is pinned right now.
 
-- The cross rate through USD is computed as (USD→A) / (USD→B), but it should be (USD→B) / (USD→A) (`BUG_CROSS_RATE`). The unit test `test_exchange_currency_rate_through_usd` pins the wrong value 0.72.
-
-Not covered by e2e yet:
+Not covered by e2e:
 - PATCH on a missing pair returns 500 instead of 404.
 - Routes have a trailing slash (`/currencies/`), so the spec paths answer with a 307 redirect (the browser follows it).
-- Money goes through `float` in the conversion math, and rates are rounded with `math.ceil`. `amount` is already parsed as `Decimal`.
 
 ## Architecture
 
@@ -67,6 +64,7 @@ Conventions to keep:
 - **Form input, not JSON.** POST/PATCH bodies are form fields. Each schema has an `as_form` classmethod used as `Depends(Schema.as_form)`, and that is where camelCase form names (`baseCurrencyCode`) are mapped to snake_case fields.
 - **camelCase responses** come from Pydantic `alias` + `AliasChoices`. `rate` is a `Decimal` that is serialized to float in JSON.
 - **Currency pair codes** like `USDEUR` are split by `utils.parse_currency_pair` (first 3 chars / rest). `exchange_rate.service.get_exc_rate` filters through `joinedload(...).and_(...)` with `innerjoin`, not through a `WHERE` clause.
-- **Conversion** (`exchange.service.get_rate`) tries, in order: the direct rate A→B, the inverse of B→A, then a cross rate through USD. Rates are rounded to 6 decimals and amounts to 2.
+- **Conversion** (`exchange.service.get_rate`) tries, in order: the direct rate A→B, the inverse of B→A, then a cross rate through USD computed as (USD→B) / (USD→A). Computed rates are rounded to 6 decimals and converted amounts to 2, both `ROUND_HALF_UP` via `utils.round_rate` / `round_amount`.
+- **Money is `Decimal` end to end**: query param → DB → math. It becomes a float only in the JSON serializers, after rounding. Never build a `Decimal` from a `float`. Don't use `round()` on money either, because for `Decimal` it is banker's rounding.
 - **Validate input on the request side**: `Query(gt=0)` and the `as_form` schemas. Response DTOs (`exchange.schemas.Exchange`) carry no `ge`/`decimal_places`, because a constraint on a response schema turns bad input into a 500. Parse numeric query params as `Decimal`, not `float`: with `float`, FastAPI 0.110 lets `inf` through even with `allow_inf_nan=False`.
 - Empty-code routes (`/currency/`, `/exchangeRate/`) exist only to return a 400 and are hidden from the schema.
