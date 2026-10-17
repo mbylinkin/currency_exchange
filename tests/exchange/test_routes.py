@@ -4,6 +4,8 @@ from fastapi import status
 
 from src import models
 
+from ..factories import ExchangeRateFactory
+
 
 def test_exchange_currency_direct(
     app_client: TestClient, create_exc_rate_usd_eur: models.ExchangeRates
@@ -43,8 +45,10 @@ def test_exchange_currency_rate_through_usd(
     resp_json = resp.json()
 
     assert resp.status_code == status.HTTP_200_OK
+    # USD->EUR = 1.1, USD->GBP = 1.52, so EUR->GBP = 1.52 / 1.1
+    assert resp_json["rate"] == 1.381818
     assert resp_json["amount"] == 1.0
-    assert resp_json["convertedAmount"] == 0.72
+    assert resp_json["convertedAmount"] == 1.38
 
 
 def test_exchange_currency_rate_not_found(
@@ -103,3 +107,34 @@ def test_exchange_currency_small_converted_amount(
 
     assert resp.status_code == status.HTTP_200_OK
     assert resp.json()["convertedAmount"] == 0.0
+
+
+def test_exchange_currency_rounds_half_up(
+    app_client: TestClient, create_exc_rate_usd_eur: models.ExchangeRates
+) -> None:
+    # 0.15 * 1.1 = 0.165 exactly: half-up gives 0.17, banker's rounding 0.16
+    resp = app_client.get(
+        "/exchange/", params={"from": "USD", "to": "EUR", "amount": "0.15"}
+    )
+
+    assert resp.status_code == status.HTTP_200_OK
+    assert resp.json()["convertedAmount"] == 0.17
+
+
+def test_exchange_currency_reversed_rate_rounds_to_nearest(
+    app_client: TestClient,
+    create_currency_usd: models.Currency,
+    create_currency_eur: models.Currency,
+) -> None:
+    ExchangeRateFactory(
+        base_currency=create_currency_usd, target_currency=create_currency_eur, rate=3
+    )
+
+    resp = app_client.get(
+        "/exchange/", params={"from": "EUR", "to": "USD", "amount": "3"}
+    )
+
+    # 1 / 3 = 0.3333333...: nearest is 0.333333, not rounded up to 0.333334
+    assert resp.status_code == status.HTTP_200_OK
+    assert resp.json()["rate"] == 0.333333
+    assert resp.json()["convertedAmount"] == 1.0

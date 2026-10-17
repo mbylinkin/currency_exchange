@@ -2,12 +2,6 @@ import httpx
 import pytest
 from playwright.sync_api import Page, expect
 
-# Known spec violations. strict=True fails the run once a bug is fixed,
-# so the fix must also remove its marker.
-BUG_CROSS_RATE = pytest.mark.xfail(
-    strict=True, reason="cross rate via USD is inverted: (USD->A) / (USD->B)"
-)
-
 
 def seed_currency(api: httpx.Client, code: str, name: str, sign: str) -> None:
     resp = api.post("/currencies", data={"code": code, "name": name, "sign": sign})
@@ -135,9 +129,7 @@ def test_edit_exchange_rate(
         pytest.param("USD", "EUR", "10", "9.5", id="direct"),
         pytest.param("EUR", "USD", "10", "10.53", id="reversed"),
         # USD->EUR = 0.95, USD->GBP = 0.8, so EUR->GBP = 0.8 / 0.95
-        pytest.param(
-            "EUR", "GBP", "10", "8.42", id="cross-via-usd", marks=BUG_CROSS_RATE
-        ),
+        pytest.param("EUR", "GBP", "10", "8.42", id="cross-via-usd"),
     ],
 )
 def test_convert(
