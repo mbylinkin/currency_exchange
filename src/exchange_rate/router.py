@@ -12,7 +12,7 @@ from src.exchange_rate.service import (
 router = APIRouter()
 
 
-@router.get("/exchangeRates/", response_model=list[schemas.ExchangeRate])
+@router.get("/exchangeRates", response_model=list[schemas.ExchangeRate])
 def get_exchange_rates():
     return get_exc_rate_list()
 
@@ -30,7 +30,7 @@ def get_exchange_rate_by_code(code: str):
 
 
 @router.post(
-    "/exchangeRates/",
+    "/exchangeRates",
     response_model=schemas.ExchangeRate,
     status_code=status.HTTP_201_CREATED,
 )

@@ -27,7 +27,7 @@ def test_add_exchange_rate(
         },
     }
     resp = app_client.post(
-        "/exchangeRates/",
+        "/exchangeRates",
         data={
             "baseCurrencyCode": create_currency_usd.code,
             "targetCurrencyCode": create_currency_eur.code,
@@ -62,7 +62,7 @@ def test_get_exchange_rate_list(
         }
     ]
 
-    resp = app_client.get("/exchangeRates/")
+    resp = app_client.get("/exchangeRates")
     resp_json = resp.json()
 
     assert resp.status_code == status.HTTP_200_OK
@@ -155,7 +155,7 @@ def test_add_exchange_rate_missing_field(
     create_currency_eur: models.Currency,
 ) -> None:
     resp = app_client.post(
-        "/exchangeRates/",
+        "/exchangeRates",
         data={"baseCurrencyCode": "USD", "targetCurrencyCode": "EUR"},
     )
 
@@ -171,7 +171,7 @@ def test_add_exchange_rate_invalid_rate(
     rate: str,
 ) -> None:
     resp = app_client.post(
-        "/exchangeRates/",
+        "/exchangeRates",
         data={"baseCurrencyCode": "USD", "targetCurrencyCode": "EUR", "rate": rate},
     )
 
@@ -192,7 +192,7 @@ def test_add_exchange_rate_already_exists(
     app_client: TestClient, create_exc_rate_usd_eur: models.ExchangeRates
 ) -> None:
     resp = app_client.post(
-        "/exchangeRates/",
+        "/exchangeRates",
         data={"baseCurrencyCode": "USD", "targetCurrencyCode": "EUR", "rate": 2},
     )
 

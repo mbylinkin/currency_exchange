@@ -42,12 +42,11 @@ CI (`.github/workflows/ci.yml`) runs three jobs on every PR: pre-commit (hygiene
 - `e2e/` — Playwright tests that drive the spec's reference frontend ([zhukovsd/currency-exchange-frontend](https://github.com/zhukovsd/currency-exchange-frontend), pinned by `FRONTEND_COMMIT` in `e2e/frontend.py`). It is fetched into the gitignored `e2e/frontend/` as a shallow download of only that commit, and only when it's missing, so bumping the pin needs no manual cleanup. Local edits in `e2e/frontend/` are overwritten. `e2e/conftest.py` migrates a temp SQLite DB, starts uvicorn on a free port with CORS for the frontend origin, and serves the frontend from a thread. The frontend's hardcoded API root in `js/app.js` is rewritten on the fly, never patched on disk. Each test starts with empty tables. Seed data through the `api` fixture (httpx), not the UI.
 - The frontend reads `error.message` from every error response and shows it in `#api-error-toast`. That is why the error format matters beyond the unit tests.
 
-## Known spec violations (open)
+## Spec violations
 
-Pin a bug that is visible through the frontend with an e2e test marked by a named constant in `e2e/test_frontend.py`: `BUG_X = pytest.mark.xfail(strict=True, reason=...)`. The fix deletes the constant and its usages. Strict xfail fails the run once the bug is gone. No e2e test is pinned right now.
+None known. Fix them one per branch/PR, red test first.
 
-Not covered by e2e:
-- Routes have a trailing slash (`/currencies/`), so the spec paths answer with a 307 redirect (the browser follows it).
+To pin a bug that is visible through the frontend before fixing it, add a named constant to `e2e/test_frontend.py`: `BUG_X = pytest.mark.xfail(strict=True, reason=...)`. The fix deletes the constant and its usages. Strict xfail fails the run once the bug is gone.
 
 ## Architecture
 
@@ -66,4 +65,5 @@ Conventions to keep:
 - **Conversion** (`exchange.service.get_rate`) tries, in order: the direct rate A→B, the inverse of B→A, then a cross rate through USD computed as (USD→B) / (USD→A). Computed rates are rounded to 6 decimals and converted amounts to 2, both `ROUND_HALF_UP` via `utils.round_rate` / `round_amount`.
 - **Money is `Decimal` end to end**: query param → DB → math. It becomes a float only in the JSON serializers, after rounding. Never build a `Decimal` from a `float`. Don't use `round()` on money either, because for `Decimal` it is banker's rounding.
 - **Validate input on the request side**: `Query(gt=0)` and the `as_form` schemas. Response DTOs (`exchange.schemas.Exchange`) carry no `ge`/`decimal_places`, because a constraint on a response schema turns bad input into a 500. Parse numeric query params as `Decimal`, not `float`: with `float`, FastAPI 0.110 lets `inf` through even with `allow_inf_nan=False`.
+- **Route paths match the spec exactly, with no trailing slash** (`/currencies`, `/exchangeRates`, `/exchange`). A trailing slash makes the spec path answer with a 307 redirect. `test_spec_paths_are_not_redirected` and the e2e `test_frontend_requests_are_not_redirected` guard this.
 - Empty-code routes (`/currency/`, `/exchangeRate/`) exist only to return a 400 and are hidden from the schema.
