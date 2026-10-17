@@ -10,10 +10,17 @@ Synchronous SQLAlchemy 2.0 over SQLite, Alembic migrations, pytest + factory_boy
 
 ## Commands
 
-Pinned deps (2024) need Python 3.11–3.12; `pydantic_core==2.16.3` has no wheels for 3.14.
+Python 3.14 (CI uses the same). `requirements.in` lists direct dependencies only. `requirements.txt` is the pinned lock generated from it, so never edit it by hand:
 
 ```bash
-uv venv --python 3.12 .venv
+uv pip compile requirements.in -o requirements.txt --universal --python-version 3.14            # after editing requirements.in
+uv pip compile requirements.in -o requirements.txt --universal --python-version 3.14 --upgrade  # bump everything
+```
+
+After bumping ruff, set the same version as `rev` of `ruff-pre-commit` in `.pre-commit-config.yaml` (`pre-commit autoupdate` does it). The ruff config is in `ruff.toml`. FastAPI's `Depends`/`Query`/`Form` defaults are whitelisted for bugbear B008 there.
+
+```bash
+uv venv --python 3.14 .venv
 uv pip install --python .venv -r requirements.txt
 python -m playwright install chromium   # for e2e; or reuse an installed browser, see below
 pre-commit install

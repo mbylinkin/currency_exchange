@@ -2,12 +2,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.currency.router import router as currency_router
-from src.exchange_rate.router import router as exchange_rate_router
-from src.exchange.router import router as exchange_router
-
 from src.exceptions import register_exception_handlers
+from src.exchange.router import router as exchange_router
+from src.exchange_rate.router import router as exchange_rate_router
 from src.settings import app as app_settings
-
 
 app = FastAPI(**app_settings.fastapi_app_configs())
 register_exception_handlers(app)

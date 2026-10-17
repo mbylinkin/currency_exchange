@@ -1,12 +1,12 @@
-from typing import Any, Generator, Iterable
-from sqlalchemy import Insert, Select, Update, create_engine, exc
+from collections.abc import Generator, Iterable
+from typing import Any
 
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy import Insert, Select, Update, create_engine, exc
+from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.pool import StaticPool
 
 from src import settings
 from src.exceptions import AlreadyExists
-
-from sqlalchemy.pool import StaticPool
 
 engine = create_engine(
     settings.app.database_url,

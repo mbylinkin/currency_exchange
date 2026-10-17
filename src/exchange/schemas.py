@@ -1,5 +1,7 @@
 from decimal import Decimal
+
 from pydantic import AliasChoices, BaseModel, Field, field_serializer
+
 from src.currency.schemas import Currency
 
 

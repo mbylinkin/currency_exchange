@@ -1,5 +1,6 @@
-from src import models
 import factory
+
+from src import models
 
 
 class CurrencyFactory(factory.alchemy.SQLAlchemyModelFactory):

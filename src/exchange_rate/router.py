@@ -1,11 +1,10 @@
 from fastapi import APIRouter, Depends, status
 
-from src.exchange_rate import exceptions
-from src.exchange_rate import schemas
+from src.exchange_rate import exceptions, schemas
 from src.exchange_rate.service import (
+    add_exc_rate,
     get_exc_rate_list,
     get_valid_exc_rate,
-    add_exc_rate,
     upd_exc_rate,
 )
 

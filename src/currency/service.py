@@ -1,13 +1,9 @@
-from typing import Iterable
+from collections.abc import Iterable
 
 from sqlalchemy import select
 
-
-from src import models
-from src.currency import schemas
-from src.currency import exceptions
-
-from src import database
+from src import database, models
+from src.currency import exceptions, schemas
 
 
 def get_currency_list() -> Iterable[models.Currency]:

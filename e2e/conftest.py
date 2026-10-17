@@ -6,10 +6,10 @@ import subprocess
 import sys
 import threading
 import time
+from collections.abc import Generator
 from pathlib import Path
-from typing import Generator
 
-import httpx
+import httpx2
 import pytest
 from playwright.sync_api import Page
 
@@ -68,9 +68,9 @@ def backend_url(db_path: Path, frontend_url: str) -> Generator[str, None, None]:
     try:
         for _ in range(50):
             try:
-                httpx.get(f"{url}/healthcheck")
+                httpx2.get(f"{url}/healthcheck")
                 break
-            except httpx.TransportError:
+            except httpx2.TransportError:
                 time.sleep(0.2)
         else:
             raise RuntimeError("Backend did not start")
@@ -100,9 +100,9 @@ def clean_db(backend_url: str, db_path: Path) -> None:
 
 
 @pytest.fixture()
-def api(backend_url: str) -> Generator[httpx.Client, None, None]:
+def api(backend_url: str) -> Generator[httpx2.Client, None, None]:
     # Seeds data directly through the API, bypassing the UI under test
-    with httpx.Client(base_url=backend_url) as client:
+    with httpx2.Client(base_url=backend_url) as client:
         yield client
 
 

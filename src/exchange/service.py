@@ -1,11 +1,8 @@
 from decimal import Decimal
 
-from src.exchange import schemas
-
 from src.currency import service as currency_service
+from src.exchange import exceptions, schemas
 from src.exchange_rate import service as exchange_rate_service
-
-from src.exchange import exceptions
 from src.utils import round_amount, round_rate
 
 

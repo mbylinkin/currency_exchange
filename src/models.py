@@ -1,7 +1,5 @@
 import sqlalchemy as sa
-from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy.orm import relationship
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 from src import constants
 
@@ -10,7 +8,7 @@ class Base(DeclarativeBase):
     metadata = sa.MetaData(naming_convention=constants.DB_NAMING_CONVENTION)
 
     repr_cols_num = 3
-    repr_cols = tuple()
+    repr_cols = ()
 
     def __repr__(self) -> str:
         cols = []

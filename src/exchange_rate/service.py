@@ -1,13 +1,11 @@
-from typing import Iterable
+from collections.abc import Iterable
 
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 
-from src import models, database
-from src.exchange_rate import exceptions, schemas
-
+from src import database, models
 from src.currency import service as currency_service
-
+from src.exchange_rate import exceptions, schemas
 from src.utils import parse_currency_pair
 
 

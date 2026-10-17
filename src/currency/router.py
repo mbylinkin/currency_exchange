@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, status
 
 from src.currency import exceptions, schemas
 from src.currency.service import (
-    get_currency_list,
     add_currency,
+    get_currency_list,
     get_valid_currency,
 )
 

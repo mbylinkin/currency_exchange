@@ -1,7 +1,8 @@
-from typing import Self
-from fastapi import Form
-from pydantic import BaseModel, field_validator
 import re
+from typing import Self
+
+from fastapi import Form
+from pydantic import BaseModel, ConfigDict, field_validator
 
 
 class CurrencyBase(BaseModel):
@@ -40,5 +41,4 @@ class CurrencyUpdate(CurrencyBase):
 class Currency(CurrencyBase):
     id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
