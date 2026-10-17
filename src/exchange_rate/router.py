@@ -4,7 +4,7 @@ from src.exchange_rate import exceptions
 from src.exchange_rate import schemas
 from src.exchange_rate.service import (
     get_exc_rate_list,
-    get_exc_rate,
+    get_valid_exc_rate,
     add_exc_rate,
     upd_exc_rate,
 )
@@ -26,10 +26,7 @@ def get_exchange_rate_empty_code():
 
 @router.get("/exchangeRate/{code}", response_model=schemas.ExchangeRate)
 def get_exchange_rate_by_code(code: str):
-    exc_rate = get_exc_rate(code)
-    if not exc_rate:
-        raise exceptions.ExcRateNotFound()
-    return exc_rate
+    return get_valid_exc_rate(code)
 
 
 @router.post(

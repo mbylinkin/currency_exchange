@@ -200,3 +200,12 @@ def test_add_exchange_rate_already_exists(
     assert (
         resp.json()["message"] == "Exchange rate for this currency pair already exists"
     )
+
+
+def test_update_exchange_rate_not_found(
+    app_client: TestClient, create_exc_rate_usd_eur: models.ExchangeRates
+) -> None:
+    resp = app_client.patch("/exchangeRate/USDGBP", data={"rate": 1.5})
+
+    assert resp.status_code == status.HTTP_404_NOT_FOUND
+    assert resp.json()["message"] == "Exchange rate not found"
