@@ -4,10 +4,6 @@ from playwright.sync_api import Page, expect
 
 # Known spec violations. strict=True fails the run once a bug is fixed,
 # so the fix must also remove its marker.
-BUG_VALIDATION_STATUS = pytest.mark.xfail(
-    strict=True,
-    reason="missing/invalid fields return 422 or 500 instead of 400 with a message",
-)
 BUG_DUPLICATE_RATE_MESSAGE = pytest.mark.xfail(
     strict=True, reason="duplicate exchange rate returns 409 with 'Server error'"
 )
@@ -85,7 +81,6 @@ def test_add_duplicate_currency_shows_error(
     expect(error_toast(page)).to_contain_text("already exists")
 
 
-@BUG_VALIDATION_STATUS
 def test_add_currency_missing_field_shows_error(page: Page, frontend: str) -> None:
     page.goto(frontend)
 
@@ -183,7 +178,6 @@ def test_convert_without_rate_shows_error(
     expect(error_toast(page)).to_contain_text("not found")
 
 
-@BUG_VALIDATION_STATUS
 def test_convert_invalid_amount_shows_error(
     page: Page, frontend: str, usd_eur_gbp: None
 ) -> None:

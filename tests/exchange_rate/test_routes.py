@@ -1,3 +1,4 @@
+import pytest
 from fastapi.testclient import TestClient
 from fastapi import status
 
@@ -146,3 +147,42 @@ def test_update_exchange_rate(
     assert resp_json["rate"] == expected["rate"]
     assert resp_json["baseCurrency"] == expected["baseCurrency"]
     assert resp_json["targetCurrency"] == expected["targetCurrency"]
+
+
+def test_add_exchange_rate_missing_field(
+    app_client: TestClient,
+    create_currency_usd: models.Currency,
+    create_currency_eur: models.Currency,
+) -> None:
+    resp = app_client.post(
+        "/exchangeRates/",
+        data={"baseCurrencyCode": "USD", "targetCurrencyCode": "EUR"},
+    )
+
+    assert resp.status_code == status.HTTP_400_BAD_REQUEST
+    assert resp.json()["message"] == "Missing required field 'rate'"
+
+
+@pytest.mark.parametrize("rate", ["0", "-1", "abc"])
+def test_add_exchange_rate_invalid_rate(
+    app_client: TestClient,
+    create_currency_usd: models.Currency,
+    create_currency_eur: models.Currency,
+    rate: str,
+) -> None:
+    resp = app_client.post(
+        "/exchangeRates/",
+        data={"baseCurrencyCode": "USD", "targetCurrencyCode": "EUR", "rate": rate},
+    )
+
+    assert resp.status_code == status.HTTP_400_BAD_REQUEST
+    assert resp.json()["message"].startswith("Invalid field 'rate'")
+
+
+def test_update_exchange_rate_missing_field(
+    app_client: TestClient, create_exc_rate_usd_eur: models.ExchangeRates
+) -> None:
+    resp = app_client.patch("/exchangeRate/USDEUR", data={})
+
+    assert resp.status_code == status.HTTP_400_BAD_REQUEST
+    assert resp.json()["message"] == "Missing required field 'rate'"
