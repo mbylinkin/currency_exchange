@@ -102,7 +102,7 @@ def clean_db(backend_url: str, db_path: Path) -> None:
 @pytest.fixture()
 def api(backend_url: str) -> Generator[httpx.Client, None, None]:
     # Seeds data directly through the API, bypassing the UI under test
-    with httpx.Client(base_url=backend_url, follow_redirects=True) as client:
+    with httpx.Client(base_url=backend_url) as client:
         yield client
 
 

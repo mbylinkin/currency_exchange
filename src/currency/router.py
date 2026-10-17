@@ -10,7 +10,7 @@ from src.currency.service import (
 router = APIRouter()
 
 
-@router.get("/currencies/", response_model=list[schemas.Currency])
+@router.get("/currencies", response_model=list[schemas.Currency])
 def get_currencies():
     return get_currency_list()
 
@@ -26,7 +26,7 @@ def get_currency_by_code(code: str):
 
 
 @router.post(
-    "/currencies/",
+    "/currencies",
     response_model=schemas.Currency,
     status_code=status.HTTP_201_CREATED,
 )

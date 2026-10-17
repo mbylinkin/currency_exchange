@@ -11,7 +11,7 @@ def test_exchange_currency_direct(
     app_client: TestClient, create_exc_rate_usd_eur: models.ExchangeRates
 ) -> None:
     resp = app_client.get(
-        "/exchange/", params={"from": "USD", "to": "EUR", "amount": 1.0}
+        "/exchange", params={"from": "USD", "to": "EUR", "amount": 1.0}
     )
 
     resp_json = resp.json()
@@ -25,7 +25,7 @@ def test_exchange_currency_reversed(
     app_client: TestClient, create_exc_rate_usd_eur: models.ExchangeRates
 ) -> None:
     resp = app_client.get(
-        "/exchange/", params={"from": "EUR", "to": "USD", "amount": 1.0}
+        "/exchange", params={"from": "EUR", "to": "USD", "amount": 1.0}
     )
 
     resp_json = resp.json()
@@ -39,7 +39,7 @@ def test_exchange_currency_rate_through_usd(
     app_client: TestClient, create_exc_rate_list: list[models.ExchangeRates]
 ) -> None:
     resp = app_client.get(
-        "/exchange/", params={"from": "EUR", "to": "GBP", "amount": 1.0}
+        "/exchange", params={"from": "EUR", "to": "GBP", "amount": 1.0}
     )
 
     resp_json = resp.json()
@@ -55,7 +55,7 @@ def test_exchange_currency_rate_not_found(
     app_client: TestClient, create_currency_eur, create_currency_gpb
 ) -> None:
     resp = app_client.get(
-        "/exchange/", params={"from": "EUR", "to": "GBP", "amount": 1.0}
+        "/exchange", params={"from": "EUR", "to": "GBP", "amount": 1.0}
     )
 
     resp_json = resp.json()
@@ -68,7 +68,7 @@ def test_exchange_currency_not_found(
     app_client: TestClient, create_currency_eur, create_currency_gpb
 ) -> None:
     resp = app_client.get(
-        "/exchange/", params={"from": "EUR", "to": "GBP", "amount": 1.0}
+        "/exchange", params={"from": "EUR", "to": "GBP", "amount": 1.0}
     )
 
     resp_json = resp.json()
@@ -82,7 +82,7 @@ def test_exchange_currency_invalid_amount(
     app_client: TestClient, create_exc_rate_usd_eur: models.ExchangeRates, amount: str
 ) -> None:
     resp = app_client.get(
-        "/exchange/", params={"from": "USD", "to": "EUR", "amount": amount}
+        "/exchange", params={"from": "USD", "to": "EUR", "amount": amount}
     )
 
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
@@ -92,7 +92,7 @@ def test_exchange_currency_invalid_amount(
 def test_exchange_currency_missing_amount(
     app_client: TestClient, create_exc_rate_usd_eur: models.ExchangeRates
 ) -> None:
-    resp = app_client.get("/exchange/", params={"from": "USD", "to": "EUR"})
+    resp = app_client.get("/exchange", params={"from": "USD", "to": "EUR"})
 
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     assert resp.json()["message"] == "Missing required field 'amount'"
@@ -102,7 +102,7 @@ def test_exchange_currency_small_converted_amount(
     app_client: TestClient, create_exc_rate_usd_eur: models.ExchangeRates
 ) -> None:
     resp = app_client.get(
-        "/exchange/", params={"from": "USD", "to": "EUR", "amount": "0.001"}
+        "/exchange", params={"from": "USD", "to": "EUR", "amount": "0.001"}
     )
 
     assert resp.status_code == status.HTTP_200_OK
@@ -114,7 +114,7 @@ def test_exchange_currency_rounds_half_up(
 ) -> None:
     # 0.15 * 1.1 = 0.165 exactly: half-up gives 0.17, banker's rounding 0.16
     resp = app_client.get(
-        "/exchange/", params={"from": "USD", "to": "EUR", "amount": "0.15"}
+        "/exchange", params={"from": "USD", "to": "EUR", "amount": "0.15"}
     )
 
     assert resp.status_code == status.HTTP_200_OK
@@ -131,7 +131,7 @@ def test_exchange_currency_reversed_rate_rounds_to_nearest(
     )
 
     resp = app_client.get(
-        "/exchange/", params={"from": "EUR", "to": "USD", "amount": "3"}
+        "/exchange", params={"from": "EUR", "to": "USD", "amount": "3"}
     )
 
     # 1 / 3 = 0.3333333...: nearest is 0.333333, not rounded up to 0.333334

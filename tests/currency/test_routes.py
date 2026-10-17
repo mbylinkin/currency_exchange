@@ -14,7 +14,7 @@ def test_add_currency(app_client: TestClient) -> None:
         "sign": "$",
     }
     resp = app_client.post(
-        "/currencies/",
+        "/currencies",
         data={
             "code": "USD",
             "name": "US Dollar",
@@ -31,7 +31,7 @@ def test_add_currency_already_exists(
     app_client: TestClient, create_currency_usd: Currency
 ) -> None:
     resp = app_client.post(
-        "/currencies/",
+        "/currencies",
         data={
             "code": "USD",
             "name": "US Dollar",
@@ -88,7 +88,7 @@ def test_get_currencies(app_client: TestClient, create_currency_eur: Currency) -
             "sign": create_currency_eur.sign,
         },
     ]
-    resp = app_client.get("/currencies/")
+    resp = app_client.get("/currencies")
     resp_json = resp.json()
 
     assert resp.status_code == status.HTTP_200_OK
@@ -96,7 +96,7 @@ def test_get_currencies(app_client: TestClient, create_currency_eur: Currency) -
 
 
 def test_add_currency_missing_field(app_client: TestClient) -> None:
-    resp = app_client.post("/currencies/", data={"code": "USD", "name": "US Dollar"})
+    resp = app_client.post("/currencies", data={"code": "USD", "name": "US Dollar"})
 
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     assert resp.json()["message"] == "Missing required field 'sign'"
@@ -113,7 +113,7 @@ def test_add_currency_invalid_code(
     app_client: TestClient, code: str, error: str
 ) -> None:
     resp = app_client.post(
-        "/currencies/", data={"code": code, "name": "US Dollar", "sign": "$"}
+        "/currencies", data={"code": code, "name": "US Dollar", "sign": "$"}
     )
 
     assert resp.status_code == status.HTTP_400_BAD_REQUEST

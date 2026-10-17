@@ -177,3 +177,31 @@ def test_convert_invalid_amount_shows_error(
     page.click("button:text('Convert')")
 
     expect(error_toast(page)).to_contain_text("amount")
+
+
+def test_frontend_requests_are_not_redirected(
+    page: Page, frontend: str, backend_url: str, usd_eur_gbp: None
+) -> None:
+    redirects: list[str] = []
+    page.on(
+        "response",
+        lambda resp: resp.url.startswith(backend_url)
+        and 300 <= resp.status < 400
+        and redirects.append(f"{resp.status} {resp.request.method} {resp.url}"),
+    )
+    page.goto(frontend)
+    expect(page.locator(".currencies-table tbody tr")).to_have_count(3)
+
+    page.fill("#add-currency-code", "JPY")
+    page.fill("#add-currency-name", "Yen")
+    page.fill("#add-currency-sign", "¥")
+    page.click("text=Add Currency")
+    expect(page.locator(".currencies-table tbody tr")).to_have_count(4)
+
+    page.select_option("#convert-base-currency", "USD")
+    page.select_option("#convert-target-currency", "EUR")
+    page.fill("#convert-amount", "10")
+    page.click("button:text('Convert')")
+    expect(page.locator("#convert-converted-amount")).to_have_value("9.5")
+
+    assert redirects == []
