@@ -4,9 +4,6 @@ from playwright.sync_api import Page, expect
 
 # Known spec violations. strict=True fails the run once a bug is fixed,
 # so the fix must also remove its marker.
-BUG_DUPLICATE_RATE_MESSAGE = pytest.mark.xfail(
-    strict=True, reason="duplicate exchange rate returns 409 with 'Server error'"
-)
 BUG_CROSS_RATE = pytest.mark.xfail(
     strict=True, reason="cross rate via USD is inverted: (USD->A) / (USD->B)"
 )
@@ -105,7 +102,6 @@ def test_add_exchange_rate(
     assert api.get("/exchangeRate/EURGBP").json()["rate"] == 0.85
 
 
-@BUG_DUPLICATE_RATE_MESSAGE
 def test_add_duplicate_exchange_rate_shows_error(
     page: Page, frontend: str, usd_eur_gbp: None
 ) -> None:

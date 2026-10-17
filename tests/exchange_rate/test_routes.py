@@ -186,3 +186,17 @@ def test_update_exchange_rate_missing_field(
 
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     assert resp.json()["message"] == "Missing required field 'rate'"
+
+
+def test_add_exchange_rate_already_exists(
+    app_client: TestClient, create_exc_rate_usd_eur: models.ExchangeRates
+) -> None:
+    resp = app_client.post(
+        "/exchangeRates/",
+        data={"baseCurrencyCode": "USD", "targetCurrencyCode": "EUR", "rate": 2},
+    )
+
+    assert resp.status_code == status.HTTP_409_CONFLICT
+    assert (
+        resp.json()["message"] == "Exchange rate for this currency pair already exists"
+    )
