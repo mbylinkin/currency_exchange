@@ -1,12 +1,16 @@
 # Extra pytest-playwright args, e.g. E2E_ARGS="--browser-channel msedge --headed"
 E2E_ARGS ?=
 
-run-dev:
+# Apply migrations; creates the SQLite file and tables on first run
+migrate:
+	alembic upgrade head
+
+
+run-dev: migrate
 	python run.py
 
 
-run-prod:
-	alembic upgrade head
+run-prod: migrate
 	python run.py
 
 
