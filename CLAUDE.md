@@ -45,14 +45,13 @@ CI (`.github/workflows/ci.yml`) runs three jobs on every PR: pre-commit (hygiene
 
 Each of these has a `xfail(strict=True)` e2e test in `e2e/test_frontend.py` (`BUG_*` markers). A fix must remove its marker: strict xfail fails the run once the bug is gone.
 
-- A missing form field returns FastAPI's 422 with `{"detail": [...]}`, and an invalid `amount` (≤ 0) returns a 500. The spec asks for 400 with a message (`BUG_VALIDATION_STATUS`).
 - A duplicate exchange rate pair returns 409 with the text "Server error" (`BUG_DUPLICATE_RATE_MESSAGE`). Base `AlreadyExists` has no `DETAIL`, and the exchange rate router doesn't map it the way the currency router does.
 - The cross rate through USD is computed as (USD→A) / (USD→B), but it should be (USD→B) / (USD→A) (`BUG_CROSS_RATE`). The unit test `test_exchange_currency_rate_through_usd` pins the wrong value 0.72.
 
 Not covered by e2e yet:
 - PATCH on a missing pair returns 500 instead of 404.
 - Routes have a trailing slash (`/currencies/`), so the spec paths answer with a 307 redirect (the browser follows it).
-- Money goes through `float`.
+- Money goes through `float` in the conversion math, and rates are rounded with `math.ceil`. `amount` is already parsed as `Decimal`.
 
 ## Architecture
 
@@ -60,7 +59,7 @@ Each domain package (`src/currency`, `src/exchange_rate`, `src/exchange`) has `r
 
 - `database.py` — one module-level engine (`StaticPool`, `echo=True`). Services don't use FastAPI DI for sessions. They build `select()` statements and call `fetch_one` / `fetch_all` / `upd_one`, which each open and close their own session. `upd_one` turns `IntegrityError` into `AlreadyExists` (409).
 - `models.py` — all ORM models in one file (`Currency`, `ExchangeRates`). `ExchangeRates` eagerly joins both currencies. Constraint names come from `constants.DB_NAMING_CONVENTION`. Alembic's `env.py` uses `src.models.Base.metadata` and `src.database.engine`.
-- `exceptions.py` — `DetailedHTTPException` subclasses set `STATUS_CODE`/`DETAIL` as class attributes. Domain exceptions subclass these (e.g. `CurrencyNotFound(NotFound)`) and are raised directly from services. `register_exception_handlers` (called in `main.py`) renders every `HTTPException`, including Starlette's own 404/405, as `{"message": detail}`, and any unhandled exception as `500 {"message": "Server error"}`. Never return `{"detail": ...}`: the spec and the frontend read `message`.
+- `exceptions.py` — `DetailedHTTPException` subclasses set `STATUS_CODE`/`DETAIL` as class attributes. Domain exceptions subclass these (e.g. `CurrencyNotFound(NotFound)`) and are raised directly from services. `register_exception_handlers` (called in `main.py`) renders every `HTTPException`, including Starlette's own 404/405, as `{"message": detail}`, and any unhandled exception as `500 {"message": "Server error"}`. It also turns validation errors into `400 {"message": "Missing required field 'x'"}` / `"Invalid field 'x': ..."`. That covers FastAPI's `RequestValidationError` and the plain pydantic `ValidationError` raised when `as_form` builds a schema. Never return `{"detail": ...}`: the spec and the frontend read `message`.
 - `settings.py` — `AppSettings` (`APP_` prefix) and `ServerSettings` (`SERVER_` prefix), created once at import as `settings.app` / `settings.server`. `APP_CORS_ORIGINS` and `APP_CORS_HEADERS` are required.
 
 Conventions to keep:
@@ -69,4 +68,5 @@ Conventions to keep:
 - **camelCase responses** come from Pydantic `alias` + `AliasChoices`. `rate` is a `Decimal` that is serialized to float in JSON.
 - **Currency pair codes** like `USDEUR` are split by `utils.parse_currency_pair` (first 3 chars / rest). `exchange_rate.service.get_exc_rate` filters through `joinedload(...).and_(...)` with `innerjoin`, not through a `WHERE` clause.
 - **Conversion** (`exchange.service.get_rate`) tries, in order: the direct rate A→B, the inverse of B→A, then a cross rate through USD. Rates are rounded to 6 decimals and amounts to 2.
+- **Validate input on the request side**: `Query(gt=0)` and the `as_form` schemas. Response DTOs (`exchange.schemas.Exchange`) carry no `ge`/`decimal_places`, because a constraint on a response schema turns bad input into a 500. Parse numeric query params as `Decimal`, not `float`: with `float`, FastAPI 0.110 lets `inf` through even with `allow_inf_nan=False`.
 - Empty-code routes (`/currency/`, `/exchangeRate/`) exist only to return a 400 and are hidden from the schema.

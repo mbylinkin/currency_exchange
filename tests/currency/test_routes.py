@@ -1,3 +1,4 @@
+import pytest
 from fastapi.testclient import TestClient
 
 from fastapi import status
@@ -92,3 +93,28 @@ def test_get_currencies(app_client: TestClient, create_currency_eur: Currency) -
 
     assert resp.status_code == status.HTTP_200_OK
     assert resp_json == expected
+
+
+def test_add_currency_missing_field(app_client: TestClient) -> None:
+    resp = app_client.post("/currencies/", data={"code": "USD", "name": "US Dollar"})
+
+    assert resp.status_code == status.HTTP_400_BAD_REQUEST
+    assert resp.json()["message"] == "Missing required field 'sign'"
+
+
+@pytest.mark.parametrize(
+    ("code", "error"),
+    [
+        ("US", "Currency code must be 3 characters long"),
+        ("U5D", "Currency code must contain only letters (a-z or A-Z)"),
+    ],
+)
+def test_add_currency_invalid_code(
+    app_client: TestClient, code: str, error: str
+) -> None:
+    resp = app_client.post(
+        "/currencies/", data={"code": code, "name": "US Dollar", "sign": "$"}
+    )
+
+    assert resp.status_code == status.HTTP_400_BAD_REQUEST
+    assert resp.json()["message"] == f"Invalid field 'code': Value error, {error}"

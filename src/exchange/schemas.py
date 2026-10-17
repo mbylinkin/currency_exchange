@@ -15,16 +15,12 @@ class Exchange(BaseModel):
         validation_alias=AliasChoices("target_currency", "targetCurrency"),
     )
 
-    rate: Decimal = Field(
-        ..., description="Currency rate", ge=0.000001, decimal_places=6
-    )
-    amount: Decimal = Field(..., description="Amount", ge=0.01, decimal_places=2)
+    rate: Decimal = Field(..., description="Currency rate")
+    amount: Decimal = Field(..., description="Amount")
     converted_amount: Decimal = Field(
         ...,
         alias="convertedAmount",
         validation_alias=AliasChoices("converted_amount", "convertedAmount"),
-        ge=0.01,
-        decimal_places=2,
     )
 
     @field_serializer("rate", when_used="json")

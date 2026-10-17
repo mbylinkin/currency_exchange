@@ -34,7 +34,7 @@ def get_rate(from_currency: str, to_currency: str):
 
 
 def exc_currency(
-    from_currency: str, to_currency: str, amount: float
+    from_currency: str, to_currency: str, amount: decimal.Decimal
 ) -> schemas.Exchange:
     from_currency_value = currency_service.get_valid_currency(from_currency)
     to_currency_value = currency_service.get_valid_currency(to_currency)
