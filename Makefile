@@ -11,6 +11,18 @@ migrate:
 	uv run alembic upgrade head
 
 
+# Fail if models.py has schema changes that no migration covers.
+# Runs on a throwaway DB, so it needs no .env.
+check-migrations: export APP_DATABASE_URL = sqlite:///./.migrations-check.db
+check-migrations: export APP_CORS_ORIGINS = []
+check-migrations: export APP_CORS_HEADERS = []
+check-migrations:
+	rm -f .migrations-check.db
+	uv run alembic upgrade head
+	uv run alembic check
+	rm -f .migrations-check.db
+
+
 run-dev: migrate
 	uv run python run.py
 
