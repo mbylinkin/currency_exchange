@@ -18,7 +18,7 @@ def get_exc_rate_list() -> Iterable[models.ExchangeRates]:
 
 
 def get_exc_rate(code: str) -> models.ExchangeRates | None:
-    base_val_code, target_val_code = parse_currency_pair(code)
+    base_val_code, target_val_code = parse_currency_pair(code.upper())
 
     stmt = select(models.ExchangeRates).options(
         joinedload(

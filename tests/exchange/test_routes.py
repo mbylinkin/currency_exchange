@@ -142,3 +142,22 @@ def test_exchange_currency_reversed_rate_rounds_to_nearest(
     assert resp.status_code == status.HTTP_200_OK
     assert resp.json()["rate"] == 0.333333
     assert resp.json()["convertedAmount"] == 1.0
+
+
+@pytest.mark.parametrize(
+    "from_code, to_code",
+    [("usd", "eur"), ("eur", "usd"), ("eur", "gbp")],
+    ids=["direct", "reversed", "cross"],
+)
+def test_exchange_currency_case_insensitive(
+    app_client: TestClient,
+    create_exc_rate_list: list[models.ExchangeRates],
+    from_code: str,
+    to_code: str,
+) -> None:
+    resp = app_client.get(
+        "/exchange", params={"from": from_code, "to": to_code, "amount": 10}
+    )
+
+    assert resp.status_code == status.HTTP_200_OK
+    assert resp.json()["baseCurrency"]["code"] == from_code.upper()

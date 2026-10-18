@@ -209,3 +209,35 @@ def test_update_exchange_rate_not_found(
 
     assert resp.status_code == status.HTTP_404_NOT_FOUND
     assert resp.json()["message"] == "Exchange rate not found"
+
+
+def test_add_exchange_rate_lowercase_codes(
+    app_client: TestClient,
+    create_currency_usd: models.Currency,
+    create_currency_eur: models.Currency,
+) -> None:
+    resp = app_client.post(
+        "/exchangeRates",
+        data={"baseCurrencyCode": "usd", "targetCurrencyCode": "eur", "rate": 1.1},
+    )
+
+    assert resp.status_code == status.HTTP_201_CREATED
+    assert resp.json()["baseCurrency"]["code"] == "USD"
+
+
+def test_get_exchange_rate_by_code_case_insensitive(
+    app_client: TestClient, create_exc_rate_usd_eur: models.ExchangeRates
+) -> None:
+    resp = app_client.get("/exchangeRate/usdEur")
+
+    assert resp.status_code == status.HTTP_200_OK
+    assert resp.json()["rate"] == 1.1
+
+
+def test_update_exchange_rate_case_insensitive(
+    app_client: TestClient, create_exc_rate_usd_eur: models.ExchangeRates
+) -> None:
+    resp = app_client.patch("/exchangeRate/usdeur", data={"rate": 1.2})
+
+    assert resp.status_code == status.HTTP_200_OK
+    assert resp.json()["rate"] == 1.2

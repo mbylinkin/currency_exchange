@@ -12,7 +12,8 @@ def get_currency_list() -> Iterable[models.Currency]:
 
 
 def get_currency(code: str) -> models.Currency | None:
-    stmt = select(models.Currency).where(models.Currency.code == code)
+    # Codes are stored uppercase (see CurrencyCreate); lookups ignore case
+    stmt = select(models.Currency).where(models.Currency.code == code.upper())
     return database.fetch_one(stmt)
 
 
