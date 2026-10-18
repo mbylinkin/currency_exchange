@@ -38,6 +38,15 @@ frontend:
 	uv run python e2e/frontend.py --port 8080 --api-url http://localhost:8000
 
 
+# API on :8000 + reference frontend on :8080 in containers (DB in a volume)
+docker-up:
+	docker compose up --build --detach --wait
+
+
+docker-down:
+	docker compose down
+
+
 lint:
 	uv run ruff check .
 	uv run ruff format .

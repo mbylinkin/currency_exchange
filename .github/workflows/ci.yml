@@ -5,9 +5,11 @@ on:
     branches: [main]
   pull_request:
 
+# Runner image is pinned (not ubuntu-latest), so GitHub moving the alias to a
+# new Ubuntu can't change the build. Bump it deliberately; Dependabot doesn't.
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
@@ -16,7 +18,7 @@ jobs:
       - uses: pre-commit/action@v3.0.1
 
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
       - uses: astral-sh/setup-uv@v6
@@ -29,7 +31,7 @@ jobs:
       - run: make test-cov
 
   e2e:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
       - uses: astral-sh/setup-uv@v6
@@ -43,3 +45,17 @@ jobs:
         with:
           name: e2e-test-results
           path: test-results/
+
+  docker:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      # --wait returns once the api healthcheck passes
+      - run: docker compose up --build --detach --wait
+      - name: Smoke test
+        run: |
+          curl -fsS -X POST localhost:8000/currencies -d code=USD -d "name=US Dollar" -d 'sign=$'
+          curl -fsS localhost:8000/currencies | grep -q '"code":"USD"'
+          curl -fsS localhost:8080/js/app.js | grep -q 'http://localhost:8000'
+      - if: failure()
+        run: docker compose logs

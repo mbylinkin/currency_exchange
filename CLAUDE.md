@@ -21,7 +21,7 @@ uv lock --upgrade-package <pkg>
 
 Ruff's target version comes from `requires-python`. FastAPI's `Depends`/`Query`/`Form` defaults are whitelisted for bugbear B008 in `[tool.ruff.lint.flake8-bugbear]`. `alembic` is declared `known-third-party` for isort, because the local `alembic/` directory would otherwise make it first-party. After bumping ruff, set the same version as `rev` of `ruff-pre-commit` in `.pre-commit-config.yaml` (`pre-commit autoupdate` does it).
 
-Dependabot (`.github/dependabot.yml`) opens weekly PRs for `uv.lock` and for GitHub Actions. Minor and patch bumps come grouped into one PR, each major bump gets its own. Dependabot doesn't update `.pre-commit-config.yaml`, so when its PR bumps ruff, push `pre-commit autoupdate` onto the same branch.
+Dependabot (`.github/dependabot.yml`) opens weekly PRs for `uv.lock`, the Dockerfile base images and GitHub Actions. Minor and patch bumps come grouped into one PR, each major bump gets its own. Dependabot doesn't update `.pre-commit-config.yaml`, so when its PR bumps ruff, push `pre-commit autoupdate` onto the same branch.
 
 ```bash
 make install                            # uv sync: .venv with app + dev deps
@@ -34,6 +34,7 @@ make check-migrations             # fails if models.py changed without a migrati
 make run-dev                      # migrate, then python run.py with APP_DEBUG=true: uvicorn reload + SQL log
 make run-prod                     # same without reload and SQL log (APP_DEBUG from .env, default false)
 make frontend                     # spec's reference frontend on :8080 -> API on :8000
+make docker-up                    # both of the above in containers (docker compose); docker-down stops them
 make lint                         # ruff check + ruff format on the whole repo (alembic/ and run.py included)
 make typecheck                    # mypy: strict everywhere, relaxed for tests/ (CI runs it)
 make test                         # unit/integration tests (tests/ only)
@@ -46,7 +47,9 @@ uv run alembic revision --autogenerate -m "msg"                              # n
 
 On this Windows machine Playwright can't download Chromium (TLS interception), so run e2e on the installed Edge: `make test-e2e E2E_ARGS="--browser-channel msedge"`. CI uses the downloaded Chromium.
 
-CI (`.github/workflows/ci.yml`) runs three jobs on every PR: pre-commit (hygiene hooks + ruff), `make typecheck` + `make check-migrations` + `make test-cov`, and `make test-e2e`. Alembic's `env.py` imports app settings, so any alembic command needs `APP_CORS_ORIGINS`/`APP_CORS_HEADERS` set: from `.env` locally, from the Makefile target in CI.
+CI (`.github/workflows/ci.yml`) runs four jobs on every PR: pre-commit (hygiene hooks + ruff), `make typecheck` + `make check-migrations` + `make test-cov`, `make test-e2e`, and a `docker compose` smoke test. Jobs run on a pinned `ubuntu-24.04`, not `ubuntu-latest`. Bump it by hand before GitHub retires the image.
+
+Docker: one `Dockerfile` with two targets. `api` (the default) installs only the app dependencies from `uv.lock`, runs as a non-root user, applies migrations on start and keeps SQLite in the `/data` volume. `frontend` downloads the pinned frontend at build time and serves it with `e2e/frontend.py --no-fetch`. `.dockerignore` is an allowlist, so a new top-level file the app needs must be added there. The image's `--api-url` and `APP_CORS_ORIGINS` are the URLs as the browser on the host sees them (`localhost:8000` / `localhost:8080`), not compose service names. Alembic's `env.py` imports app settings, so any alembic command needs `APP_CORS_ORIGINS`/`APP_CORS_HEADERS` set: from `.env` locally, from the Makefile target in CI.
 
 ## Tests
 
