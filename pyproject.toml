@@ -53,6 +53,10 @@ directory = "tests/coverage"
 fail_under = 80
 skip_empty = true
 
+[tool.ruff.lint.isort]
+# The local alembic/ directory would otherwise make the alembic package first-party
+known-third-party = ["alembic"]
+
 [tool.ruff.lint.flake8-bugbear]
 # FastAPI declares request parameters through calls in argument defaults
 extend-immutable-calls = [
@@ -62,7 +66,7 @@ extend-immutable-calls = [
 ]
 
 [tool.mypy]
-files = ["src", "tests", "e2e"]
+files = ["src", "tests", "e2e", "alembic", "run.py"]
 plugins = ["pydantic.mypy"]
 strict = true
 

@@ -19,7 +19,7 @@ uv lock --upgrade             # bump everything (then run tests + e2e)
 uv lock --upgrade-package <pkg>
 ```
 
-Ruff's target version comes from `requires-python`. FastAPI's `Depends`/`Query`/`Form` defaults are whitelisted for bugbear B008 in `[tool.ruff.lint.flake8-bugbear]`. After bumping ruff, set the same version as `rev` of `ruff-pre-commit` in `.pre-commit-config.yaml` (`pre-commit autoupdate` does it).
+Ruff's target version comes from `requires-python`. FastAPI's `Depends`/`Query`/`Form` defaults are whitelisted for bugbear B008 in `[tool.ruff.lint.flake8-bugbear]`. `alembic` is declared `known-third-party` for isort, because the local `alembic/` directory would otherwise make it first-party. After bumping ruff, set the same version as `rev` of `ruff-pre-commit` in `.pre-commit-config.yaml` (`pre-commit autoupdate` does it).
 
 ```bash
 make install                            # uv sync: .venv with app + dev deps
@@ -32,14 +32,14 @@ make check-migrations             # fails if models.py changed without a migrati
 make run-dev                      # migrate, then python run.py with APP_DEBUG=true: uvicorn reload + SQL log
 make run-prod                     # same without reload and SQL log (APP_DEBUG from .env, default false)
 make frontend                     # spec's reference frontend on :8080 -> API on :8000
-make lint                         # ruff check + ruff format on src, tests, e2e
-make typecheck                    # mypy: strict on src/e2e, relaxed for tests/ (CI runs it)
+make lint                         # ruff check + ruff format on the whole repo (alembic/ and run.py included)
+make typecheck                    # mypy: strict everywhere, relaxed for tests/ (CI runs it)
 make test                         # unit/integration tests (tests/ only)
 make test-cov                     # same + coverage (fails under 80%), HTML in tests/coverage/
 make test-e2e                     # browser tests in e2e/
 
 uv run pytest tests/exchange/test_routes.py::test_exchange_currency_direct   # single test
-uv run alembic revision --autogenerate -m "msg"                              # new migration after changing models.py
+uv run alembic revision --autogenerate -m "msg"                              # new migration after changing models.py (post-write hooks in alembic.ini run ruff on it)
 ```
 
 On this Windows machine Playwright can't download Chromium (TLS interception), so run e2e on the installed Edge: `make test-e2e E2E_ARGS="--browser-channel msedge"`. CI uses the downloaded Chromium.
