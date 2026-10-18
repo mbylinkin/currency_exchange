@@ -23,10 +23,12 @@ check-migrations:
 	rm -f .migrations-check.db
 
 
+run-dev: export APP_DEBUG = true
 run-dev: migrate
 	uv run python run.py
 
 
+# No reload, no SQL log, unless APP_DEBUG=true is set in .env
 run-prod: migrate
 	uv run python run.py
 
