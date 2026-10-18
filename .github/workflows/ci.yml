@@ -39,7 +39,7 @@ jobs:
       - run: uv run playwright install --with-deps chromium
       - run: make test-e2e E2E_ARGS="--screenshot only-on-failure --tracing retain-on-failure --output test-results"
       - if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: e2e-test-results
           path: test-results/
