@@ -1,0 +1,3 @@
+# Store and check out text files with LF on every platform,
+# regardless of each developer's core.autocrlf setting.
+* text=auto eol=lf
