@@ -1,0 +1,62 @@
+[project]
+name = "currency-exchange"
+version = "0.1.0"
+description = "REST API for currencies, exchange rates and conversions"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "alembic>=1.20.0",
+    "fastapi>=0.143.3",
+    "pydantic>=2.14.1",
+    "pydantic-settings>=2.16.0",
+    "python-multipart>=0.0.32",
+    "sqlalchemy>=2.1.5",
+    "uvicorn>=0.54.0",
+]
+
+[dependency-groups]
+dev = [
+    "factory-boy>=3.3.3",
+    "httpx2>=2.13.1",
+    "playwright>=1.64.0",
+    "pre-commit>=4.7.0",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "pytest-env>=1.8.0",
+    "pytest-playwright>=0.10.0",
+    "pytest-sugar>=1.1.1",
+    "ruff>=0.17.1",
+    "sqlalchemy-utils>=0.43.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.pytest_env]
+SERVER_HOST = "127.0.0.1"
+SERVER_PORT = "8000"
+APP_ENVIRONMENT = "TESTING"
+APP_DEBUG = "false"
+APP_DATABASE_URL = "sqlite:///./test.db"
+APP_CORS_ORIGINS = '["http://localhost"]'
+APP_CORS_HEADERS = '["*"]'
+
+[tool.coverage.run]
+branch = true
+omit = ["tests/*"]
+
+[tool.coverage.html]
+directory = "tests/coverage"
+
+[tool.coverage.report]
+fail_under = 80
+skip_empty = true
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI declares request parameters through calls in argument defaults
+extend-immutable-calls = [
+    "fastapi.Depends",
+    "fastapi.Form",
+    "fastapi.Query",
+    "fastapi.params.Query",
+]

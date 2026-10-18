@@ -21,7 +21,7 @@ def create_session() -> Session:
     return Session()
 
 
-def get_session() -> Generator[Session, None, None]:
+def get_session() -> Generator[Session]:
     try:
         session = create_session()
         yield session

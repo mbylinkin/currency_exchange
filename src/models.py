@@ -36,10 +36,10 @@ class ExchangeRates(Base):
     target_currency_id = sa.Column(sa.Integer, sa.ForeignKey("currency.id"))
     rate = sa.Column(sa.DECIMAL(10, 6))
 
-    base_currency: Mapped["Currency"] = relationship(
+    base_currency: Mapped[Currency] = relationship(
         foreign_keys=[base_currency_id], lazy="joined", innerjoin=True
     )
-    target_currency: Mapped["Currency"] = relationship(
+    target_currency: Mapped[Currency] = relationship(
         foreign_keys=[target_currency_id], lazy="joined", innerjoin=True
     )
 

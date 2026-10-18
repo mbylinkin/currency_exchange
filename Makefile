@@ -1,36 +1,41 @@
 # Extra pytest-playwright args, e.g. E2E_ARGS="--browser-channel msedge --headed"
 E2E_ARGS ?=
 
+# Create/update .venv from uv.lock (app + dev dependencies)
+install:
+	uv sync
+
+
 # Apply migrations; creates the SQLite file and tables on first run
 migrate:
-	alembic upgrade head
+	uv run alembic upgrade head
 
 
 run-dev: migrate
-	python run.py
+	uv run python run.py
 
 
 run-prod: migrate
-	python run.py
+	uv run python run.py
 
 
 # Reference frontend from the spec on :8080, talking to the API on :8000
 frontend:
-	python e2e/frontend.py --port 8080 --api-url http://localhost:8000
+	uv run python e2e/frontend.py --port 8080 --api-url http://localhost:8000
 
 
 lint:
-	ruff check src tests e2e
-	ruff format src tests e2e
+	uv run ruff check src tests e2e
+	uv run ruff format src tests e2e
 
 
 test:
-	pytest tests
+	uv run pytest tests
 
 
 test-cov:
-	pytest tests -v --cov=src --cov-report=html --cov-report=term
+	uv run pytest tests -v --cov=src --cov-report=html --cov-report=term
 
 
 test-e2e:
-	pytest e2e $(E2E_ARGS)
+	uv run pytest e2e $(E2E_ARGS)

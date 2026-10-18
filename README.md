@@ -26,16 +26,12 @@ Creates .env file from .env.example
 
 ### Install dependencies
 
-Requires Python 3.14.
+Requires [uv](https://docs.astral.sh/uv/). uv installs Python 3.14 itself if it's missing.
 
 ```bash
-pip install -r requirements.txt
+make install    # or: uv sync
 ```
-Installs all project dependencies, pinned in `requirements.txt`. To add or upgrade a dependency, edit `requirements.in` and regenerate the lock with [uv](https://docs.astral.sh/uv/):
-
-```bash
-uv pip compile requirements.in -o requirements.txt --universal --python-version 3.14
-```
+Creates `.venv` with the app and dev dependencies, pinned in `uv.lock`. Use `uv add <pkg>` (or `uv add --dev <pkg>`) to add a dependency. All `make` targets run through `uv run`, so there is no need to activate the venv.
 
 ### Run server
 
@@ -73,7 +69,7 @@ After running tests with coverage report will be available at [tests/coverage/in
 E2E tests drive the [reference frontend](https://github.com/zhukovsd/currency-exchange-frontend) from the spec in a browser (Playwright). They start the API and the frontend themselves, no `.env` needed.
 
 ```bash
-python -m playwright install chromium
+uv run playwright install chromium
 make test-e2e
 ```
 
@@ -84,7 +80,7 @@ To click through the frontend by hand, start the API (`make run-dev`) and then t
 ### Pre-commit hooks
 
 ```bash
-pre-commit install
+uv run pre-commit install
 ```
 
 Runs whitespace/YAML checks and ruff (lint + format) on every commit. CI runs the same hooks plus the unit and e2e tests on every pull request.

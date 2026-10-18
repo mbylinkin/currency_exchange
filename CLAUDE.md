@@ -6,25 +6,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 FastAPI REST API for currencies and exchange rates (no web UI), built to the
 [zhukovsd CurrencyExchange spec](https://zhukovsd.github.io/python-backend-learning-course/projects/currency-exchange/).
-Synchronous SQLAlchemy 2.0 over SQLite, Alembic migrations, pytest + factory_boy. The spec asks for plain `http.server` + `sqlite3`; FastAPI is a deliberate choice (see README). Everything else should follow the spec.
+Synchronous SQLAlchemy 2.1 over SQLite, Alembic migrations, pytest + factory_boy. The spec asks for plain `http.server` + `sqlite3`; FastAPI is a deliberate choice (see README). Everything else should follow the spec.
 
 ## Commands
 
-Python 3.14 (CI uses the same). `requirements.in` lists direct dependencies only. `requirements.txt` is the pinned lock generated from it, so never edit it by hand:
+The project is managed with [uv](https://docs.astral.sh/uv/). The Python version (3.14) comes from `.python-version`. `pyproject.toml` holds the dependencies and the pytest, pytest-env, coverage and ruff config. App dependencies live in `[project]`, everything for development in `[dependency-groups].dev`. `uv.lock` is generated: never edit it by hand. CI runs `uv sync --locked`, which fails if the lock is stale.
 
 ```bash
-uv pip compile requirements.in -o requirements.txt --universal --python-version 3.14            # after editing requirements.in
-uv pip compile requirements.in -o requirements.txt --universal --python-version 3.14 --upgrade  # bump everything
+uv add <pkg>                  # app dependency
+uv add --dev <pkg>            # dev/test dependency
+uv lock --upgrade             # bump everything (then run tests + e2e)
+uv lock --upgrade-package <pkg>
 ```
 
-After bumping ruff, set the same version as `rev` of `ruff-pre-commit` in `.pre-commit-config.yaml` (`pre-commit autoupdate` does it). The ruff config is in `ruff.toml`. FastAPI's `Depends`/`Query`/`Form` defaults are whitelisted for bugbear B008 there.
+Ruff's target version comes from `requires-python`. FastAPI's `Depends`/`Query`/`Form` defaults are whitelisted for bugbear B008 in `[tool.ruff.lint.flake8-bugbear]`. After bumping ruff, set the same version as `rev` of `ruff-pre-commit` in `.pre-commit-config.yaml` (`pre-commit autoupdate` does it).
 
 ```bash
-uv venv --python 3.14 .venv
-uv pip install --python .venv -r requirements.txt
-python -m playwright install chromium   # for e2e; or reuse an installed browser, see below
-pre-commit install
-cp .env.example .env                    # only for running the app; tests set their env in pytest.ini
+make install                            # uv sync: .venv with app + dev deps
+uv run playwright install chromium      # for e2e; or reuse an installed browser, see below
+uv run pre-commit install
+cp .env.example .env                    # only for running the app; tests set their env via [tool.pytest_env]
 
 make migrate                      # alembic upgrade head (also run by run-dev/run-prod)
 make run-dev                      # migrate, then python run.py (uvicorn, reload=True)
@@ -35,8 +36,8 @@ make test                         # unit/integration tests (tests/ only)
 make test-cov                     # same + coverage (fails under 80%), HTML in tests/coverage/
 make test-e2e                     # browser tests in e2e/
 
-pytest tests/exchange/test_routes.py::test_exchange_currency_direct   # single test
-alembic revision --autogenerate -m "msg"                              # new migration
+uv run pytest tests/exchange/test_routes.py::test_exchange_currency_direct   # single test
+uv run alembic revision --autogenerate -m "msg"                              # new migration
 ```
 
 On this Windows machine Playwright can't download Chromium (TLS interception), so run e2e on the installed Edge: `make test-e2e E2E_ARGS="--browser-channel msedge"`. CI uses the downloaded Chromium.
@@ -45,7 +46,7 @@ CI (`.github/workflows/ci.yml`) runs three jobs on every PR: pre-commit (hygiene
 
 ## Tests
 
-- `tests/` — integration tests through `TestClient`. `pytest.ini` (via pytest-env) points them at `./test.db`. The session `db` fixture drops and recreates all tables, and `app_client` deletes all rows before each test. Factories (`tests/factories.py`) commit on creation. Seed data with the `create_currency_*` / `create_exc_rate_*` fixtures.
+- `tests/` — integration tests through `TestClient`. `[tool.pytest_env]` in `pyproject.toml` points them at `./test.db`. The session `db` fixture drops and recreates all tables, and `app_client` deletes all rows before each test. Factories (`tests/factories.py`) commit on creation. Seed data with the `create_currency_*` / `create_exc_rate_*` fixtures.
 - `e2e/` — Playwright tests that drive the spec's reference frontend ([zhukovsd/currency-exchange-frontend](https://github.com/zhukovsd/currency-exchange-frontend), pinned by `FRONTEND_COMMIT` in `e2e/frontend.py`). It is fetched into the gitignored `e2e/frontend/` as a shallow download of only that commit, and only when it's missing, so bumping the pin needs no manual cleanup. Local edits in `e2e/frontend/` are overwritten. `e2e/conftest.py` migrates a temp SQLite DB, starts uvicorn on a free port with CORS for the frontend origin, and serves the frontend from a thread. The frontend's hardcoded API root in `js/app.js` is rewritten on the fly, never patched on disk. Each test starts with empty tables. Seed data through the `api` fixture (httpx), not the UI.
 - The frontend reads `error.message` from every error response and shows it in `#api-error-toast`. That is why the error format matters beyond the unit tests.
 
