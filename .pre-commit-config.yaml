@@ -9,7 +9,7 @@ repos:
     -   id: check-yaml
     -   id: check-added-large-files
 -   repo: https://github.com/astral-sh/ruff-pre-commit
-    # Keep in sync with ruff in requirements.txt
+    # Keep in sync with ruff in uv.lock (`uv tree --package ruff`)
     rev: v0.17.1
     hooks:
     -   id: ruff-check

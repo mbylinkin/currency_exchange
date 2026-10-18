@@ -41,7 +41,7 @@ def db_path(tmp_path_factory: pytest.TempPathFactory) -> Path:
 
 
 @pytest.fixture(scope="session")
-def backend_url(db_path: Path, frontend_url: str) -> Generator[str, None, None]:
+def backend_url(db_path: Path, frontend_url: str) -> Generator[str]:
     port = free_port()
     env = {
         **os.environ,
@@ -81,9 +81,7 @@ def backend_url(db_path: Path, frontend_url: str) -> Generator[str, None, None]:
 
 
 @pytest.fixture(scope="session")
-def frontend(
-    frontend_port: int, frontend_url: str, backend_url: str
-) -> Generator[str, None, None]:
+def frontend(frontend_port: int, frontend_url: str, backend_url: str) -> Generator[str]:
     fetch_frontend()
     server = make_server(frontend_port, backend_url)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
@@ -100,7 +98,7 @@ def clean_db(backend_url: str, db_path: Path) -> None:
 
 
 @pytest.fixture()
-def api(backend_url: str) -> Generator[httpx2.Client, None, None]:
+def api(backend_url: str) -> Generator[httpx2.Client]:
     # Seeds data directly through the API, bypassing the UI under test
     with httpx2.Client(base_url=backend_url) as client:
         yield client

@@ -33,24 +33,24 @@ def cleanup_db(db: Session) -> None:
 
 
 @pytest.fixture()
-def app_client(cleanup_db: Any) -> Generator[TestClient, None, None]:
+def app_client(cleanup_db: Any) -> Generator[TestClient]:
     yield TestClient(app)
 
 
 @pytest.fixture()
-def create_currency_eur() -> Generator[CurrencyFactory, None, None]:
+def create_currency_eur() -> Generator[CurrencyFactory]:
     currency = CurrencyFactory()
     yield currency
 
 
 @pytest.fixture()
-def create_currency_usd() -> Generator[CurrencyFactory, None, None]:
+def create_currency_usd() -> Generator[CurrencyFactory]:
     currency = CurrencyFactory(code="USD", name="US Dollar", sign="$")
     yield currency
 
 
 @pytest.fixture()
-def create_currency_gpb() -> Generator[CurrencyFactory, None, None]:
+def create_currency_gpb() -> Generator[CurrencyFactory]:
     currency = CurrencyFactory(code="GBP", name="Pound Sterling", sign="£")
     yield currency
 
@@ -58,7 +58,7 @@ def create_currency_gpb() -> Generator[CurrencyFactory, None, None]:
 @pytest.fixture()
 def create_exc_rate_usd_eur(
     create_currency_usd, create_currency_eur
-) -> Generator[ExchangeRateFactory, None, None]:
+) -> Generator[ExchangeRateFactory]:
     exc_rate = ExchangeRateFactory(
         base_currency=create_currency_usd, target_currency=create_currency_eur, rate=1.1
     )
@@ -68,7 +68,7 @@ def create_exc_rate_usd_eur(
 @pytest.fixture()
 def create_exc_rate_list(
     create_currency_usd, create_currency_eur, create_currency_gpb
-) -> Generator[Iterable[ExchangeRateFactory], None, None]:
+) -> Generator[Iterable[ExchangeRateFactory]]:
     usd_to_eur = ExchangeRateFactory(
         base_currency=create_currency_usd, target_currency=create_currency_eur, rate=1.1
     )
