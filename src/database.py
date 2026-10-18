@@ -1,4 +1,4 @@
-from collections.abc import Generator, Sequence
+from collections.abc import Sequence
 
 from sqlalchemy import Select, create_engine, exc
 from sqlalchemy.orm import Session, sessionmaker
@@ -18,14 +18,6 @@ engine = create_engine(
 def create_session() -> Session:
     Session = sessionmaker(bind=engine, autocommit=False, autoflush=False)
     return Session()
-
-
-def get_session() -> Generator[Session]:
-    try:
-        session = create_session()
-        yield session
-    finally:
-        session.close()
 
 
 def fetch_one[T](stmt: Select[T]) -> T | None:
