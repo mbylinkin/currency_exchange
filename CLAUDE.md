@@ -71,6 +71,7 @@ Conventions to keep:
 
 - **Form input, not JSON.** POST/PATCH bodies are form fields. Each schema has an `as_form` classmethod used as `Depends(Schema.as_form)`, and that is where camelCase form names (`baseCurrencyCode`) are mapped to snake_case fields.
 - **camelCase responses** come from Pydantic `alias` + `AliasChoices`. `rate` is a `Decimal` that is serialized to float in JSON.
+- **Currency codes are case-insensitive.** `CurrencyCreate` stores them uppercase, and `currency.service.get_currency` / `exchange_rate.service.get_exc_rate` uppercase the code before the lookup, so `usd`, `usdEur` and `/exchange?from=usd` resolve. Every other lookup goes through these two functions.
 - **Currency pair codes** like `USDEUR` are split by `utils.parse_currency_pair` (first 3 chars / rest). `exchange_rate.service.get_exc_rate` filters through `joinedload(...).and_(...)` with `innerjoin`, not through a `WHERE` clause.
 - **Conversion** (`exchange.service.get_rate`) tries, in order: the direct rate A→B, the inverse of B→A, then a cross rate through USD computed as (USD→B) / (USD→A). Computed rates are rounded to 6 decimals and converted amounts to 2, both `ROUND_HALF_UP` via `utils.round_rate` / `round_amount`.
 - **Money is `Decimal` end to end**: query param → DB → math. It becomes a float only in the JSON serializers, after rounding. Never build a `Decimal` from a `float`. Don't use `round()` on money either, because for `Decimal` it is banker's rounding.

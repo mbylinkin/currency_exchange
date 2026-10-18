@@ -117,3 +117,31 @@ def test_add_currency_invalid_code(
 
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     assert resp.json()["message"] == f"Invalid field 'code': Value error, {error}"
+
+
+def test_add_currency_stores_code_uppercase(app_client: TestClient) -> None:
+    resp = app_client.post(
+        "/currencies", data={"code": "usd", "name": "US Dollar", "sign": "$"}
+    )
+
+    assert resp.status_code == status.HTTP_201_CREATED
+    assert resp.json()["code"] == "USD"
+
+
+def test_add_currency_already_exists_other_case(
+    app_client: TestClient, create_currency_usd: Currency
+) -> None:
+    resp = app_client.post(
+        "/currencies", data={"code": "usd", "name": "US Dollar", "sign": "$"}
+    )
+
+    assert resp.status_code == status.HTTP_409_CONFLICT
+
+
+def test_get_currency_by_code_case_insensitive(
+    app_client: TestClient, create_currency_usd: Currency
+) -> None:
+    resp = app_client.get("/currency/usd")
+
+    assert resp.status_code == status.HTTP_200_OK
+    assert resp.json()["code"] == "USD"

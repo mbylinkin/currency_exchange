@@ -32,7 +32,7 @@ class CurrencyCreate(CurrencyBase):
         if not re.match(r"^[A-Za-z]+$", v):
             raise ValueError("Currency code must contain only letters (a-z or A-Z)")
 
-        return v
+        return v.upper()
 
 
 class CurrencyUpdate(CurrencyBase):
