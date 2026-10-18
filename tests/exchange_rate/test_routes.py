@@ -111,6 +111,30 @@ def test_get_exchange_rate_by_code_not_found(
     assert resp_json["message"] == "Exchange rate not found"
 
 
+def test_get_exchange_rate_by_code_picks_matching_pair(
+    app_client: TestClient, create_exc_rate_list: list[models.ExchangeRates]
+) -> None:
+    # USD->EUR comes first in the table; the lookup must not fall back to it
+    resp = app_client.get("/exchangeRate/USDGBP")
+    resp_json = resp.json()
+
+    assert resp.status_code == status.HTTP_200_OK
+    assert resp_json["rate"] == 1.52
+    assert resp_json["baseCurrency"]["code"] == "USD"
+    assert resp_json["targetCurrency"]["code"] == "GBP"
+
+
+def test_get_exchange_rate_by_code_not_found_among_other_rates(
+    app_client: TestClient, create_exc_rate_list: list[models.ExchangeRates]
+) -> None:
+    # Both currencies exist and take part in rates, but not in this pair
+    resp = app_client.get("/exchangeRate/EURGBP")
+    resp_json = resp.json()
+
+    assert resp.status_code == status.HTTP_404_NOT_FOUND
+    assert resp_json["message"] == "Exchange rate not found"
+
+
 def test_get_exchange_rate_empty_code(app_client: TestClient) -> None:
     resp = app_client.get("/exchangeRate/")
     resp_json = resp.json()
