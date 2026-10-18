@@ -28,6 +28,7 @@ uv run pre-commit install
 cp .env.example .env                    # only for running the app; tests set their env via [tool.pytest_env]
 
 make migrate                      # alembic upgrade head (also run by run-dev/run-prod)
+make check-migrations             # fails if models.py changed without a migration (CI runs it)
 make run-dev                      # migrate, then python run.py (uvicorn, reload=True)
 make run-prod                     # same as run-dev for now
 make frontend                     # spec's reference frontend on :8080 -> API on :8000
@@ -37,12 +38,12 @@ make test-cov                     # same + coverage (fails under 80%), HTML in t
 make test-e2e                     # browser tests in e2e/
 
 uv run pytest tests/exchange/test_routes.py::test_exchange_currency_direct   # single test
-uv run alembic revision --autogenerate -m "msg"                              # new migration
+uv run alembic revision --autogenerate -m "msg"                              # new migration after changing models.py
 ```
 
 On this Windows machine Playwright can't download Chromium (TLS interception), so run e2e on the installed Edge: `make test-e2e E2E_ARGS="--browser-channel msedge"`. CI uses the downloaded Chromium.
 
-CI (`.github/workflows/ci.yml`) runs three jobs on every PR: pre-commit (hygiene hooks + ruff), `make test-cov` and `make test-e2e`.
+CI (`.github/workflows/ci.yml`) runs three jobs on every PR: pre-commit (hygiene hooks + ruff), `make check-migrations` + `make test-cov`, and `make test-e2e`. Alembic's `env.py` imports app settings, so any alembic command needs `APP_CORS_ORIGINS`/`APP_CORS_HEADERS` set: from `.env` locally, from the Makefile target in CI.
 
 ## Tests
 

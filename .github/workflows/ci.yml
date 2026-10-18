@@ -24,6 +24,7 @@ jobs:
           enable-cache: true
       # --locked fails if uv.lock is out of date with pyproject.toml
       - run: uv sync --locked
+      - run: make check-migrations
       - run: make test-cov
 
   e2e:
