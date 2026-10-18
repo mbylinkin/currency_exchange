@@ -1,0 +1,19 @@
+# Weekly dependency update PRs. CI (unit + e2e) checks each one.
+version: 2
+updates:
+  - package-ecosystem: uv
+    directory: /
+    schedule:
+      interval: weekly
+    # One PR for all minor/patch bumps; each major bump gets its own
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        update-types: [minor, patch]
