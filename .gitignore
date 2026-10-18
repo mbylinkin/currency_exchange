@@ -162,6 +162,8 @@ cython_debug/
 # Local SQLite databases and coverage report
 *.db
 *.db-journal
+*.db-wal
+*.db-shm
 tests/coverage/
 
 # Reference frontend, fetched by e2e/frontend.py
