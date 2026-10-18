@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy_utils import create_database, database_exists
 
 from src import models
-from src.database import create_session, engine
+from src.database import SessionLocal, engine
 from src.main import app
 from src.models import Base
 
@@ -16,7 +16,10 @@ from .factories import CurrencyFactory, ExchangeRateFactory
 
 @pytest.fixture(scope="session")
 def db() -> Session:
-    db_session = create_session()
+    # Factories commit on creation. Without expire_on_commit=False, reading a
+    # fixture's attribute afterwards would open a new transaction (BEGIN
+    # IMMEDIATE holds the write lock) and block the app's writes.
+    db_session = SessionLocal(expire_on_commit=False)
     if not database_exists(engine.url):
         create_database(engine.url)
     Base.metadata.drop_all(bind=engine)
@@ -31,6 +34,8 @@ def db() -> Session:
 def cleanup_db(db: Session) -> None:
     for table in reversed(Base.metadata.sorted_tables):
         db.execute(table.delete())
+    # Commit, or the open transaction keeps the write lock and blocks the app
+    db.commit()
 
 
 @pytest.fixture()
