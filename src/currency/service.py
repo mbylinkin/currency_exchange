@@ -11,7 +11,7 @@ def get_currency_list() -> Iterable[models.Currency]:
     return database.fetch_all(stmt)
 
 
-def get_currency(code: str) -> models.Currency:
+def get_currency(code: str) -> models.Currency | None:
     stmt = select(models.Currency).where(models.Currency.code == code)
     return database.fetch_one(stmt)
 

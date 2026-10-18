@@ -41,6 +41,11 @@ lint:
 	uv run ruff format src tests e2e
 
 
+# mypy --strict on src and e2e, relaxed for tests (config in pyproject.toml)
+typecheck:
+	uv run mypy
+
+
 test:
 	uv run pytest tests
 

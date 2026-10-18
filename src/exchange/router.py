@@ -1,7 +1,6 @@
 from decimal import Decimal
 
-from fastapi import APIRouter
-from fastapi.params import Query
+from fastapi import APIRouter, Query
 
 from src.exchange import schemas
 from src.exchange.service import exc_currency
@@ -15,5 +14,5 @@ def exchange_currency(
     to_currency: str = Query(..., alias="to"),
     # Decimal rejects inf/NaN; float accepts inf even with allow_inf_nan=False
     amount: Decimal = Query(..., gt=0),
-):
+) -> schemas.Exchange:
     return exc_currency(from_currency, to_currency, amount)

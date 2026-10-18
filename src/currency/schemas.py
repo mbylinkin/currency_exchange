@@ -22,7 +22,8 @@ class CurrencyCreate(CurrencyBase):
         return cls(name=name, code=code, sign=sign)
 
     @field_validator("code")
-    def validate_currency_code(cls, v):
+    @classmethod
+    def validate_currency_code(cls, v: str) -> str:
         # Length check (3 symbols)
         if len(v) != 3:
             raise ValueError("Currency code must be 3 characters long")

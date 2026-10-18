@@ -26,13 +26,13 @@ class Exchange(BaseModel):
     )
 
     @field_serializer("rate", when_used="json")
-    def serialize_rate(rate: Decimal) -> float:
+    def serialize_rate(self, rate: Decimal) -> float:
         return float(rate)
 
     @field_serializer("amount", when_used="json")
-    def serialize_amount(amount: Decimal) -> float:
+    def serialize_amount(self, amount: Decimal) -> float:
         return float(amount)
 
     @field_serializer("converted_amount", when_used="json")
-    def serialize_converted_amount(converted_amount: Decimal) -> float:
+    def serialize_converted_amount(self, converted_amount: Decimal) -> float:
         return float(converted_amount)

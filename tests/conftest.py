@@ -6,7 +6,8 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 from sqlalchemy_utils import create_database, database_exists
 
-from src.database import create_session
+from src import models
+from src.database import create_session, engine
 from src.main import app
 from src.models import Base
 
@@ -14,15 +15,15 @@ from .factories import CurrencyFactory, ExchangeRateFactory
 
 
 @pytest.fixture(scope="session")
-def db():
+def db() -> Session:
     db_session = create_session()
-    engine = db_session.bind
     if not database_exists(engine.url):
         create_database(engine.url)
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
-    CurrencyFactory._meta.sqlalchemy_session = db_session
-    ExchangeRateFactory._meta.sqlalchemy_session = db_session
+    # factory_boy types _meta as the base FactoryOptions
+    CurrencyFactory._meta.sqlalchemy_session = db_session  # type: ignore[attr-defined]
+    ExchangeRateFactory._meta.sqlalchemy_session = db_session  # type: ignore[attr-defined]
     return db_session
 
 
@@ -57,7 +58,7 @@ def create_currency_gpb() -> Generator[CurrencyFactory]:
 
 @pytest.fixture()
 def create_exc_rate_usd_eur(
-    create_currency_usd, create_currency_eur
+    create_currency_usd: models.Currency, create_currency_eur: models.Currency
 ) -> Generator[ExchangeRateFactory]:
     exc_rate = ExchangeRateFactory(
         base_currency=create_currency_usd, target_currency=create_currency_eur, rate=1.1
@@ -67,7 +68,9 @@ def create_exc_rate_usd_eur(
 
 @pytest.fixture()
 def create_exc_rate_list(
-    create_currency_usd, create_currency_eur, create_currency_gpb
+    create_currency_usd: models.Currency,
+    create_currency_eur: models.Currency,
+    create_currency_gpb: models.Currency,
 ) -> Generator[Iterable[ExchangeRateFactory]]:
     usd_to_eur = ExchangeRateFactory(
         base_currency=create_currency_usd, target_currency=create_currency_eur, rate=1.1

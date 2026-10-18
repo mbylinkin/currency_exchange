@@ -1,7 +1,6 @@
-from collections.abc import Generator, Iterable
-from typing import Any
+from collections.abc import Generator, Sequence
 
-from sqlalchemy import Insert, Select, Update, create_engine, exc
+from sqlalchemy import Select, create_engine, exc
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
@@ -29,19 +28,19 @@ def get_session() -> Generator[Session]:
         session.close()
 
 
-def fetch_one(stmt: Select | Insert | Update) -> Iterable[Any] | None:
+def fetch_one[T](stmt: Select[T]) -> T | None:
     with create_session() as session:
         item = session.scalars(stmt).first()
     return item
 
 
-def fetch_all(stmt: Select | Insert | Update) -> Iterable[Any]:
+def fetch_all[T](stmt: Select[T]) -> Sequence[T]:
     with create_session() as session:
         items = session.scalars(stmt).all()
     return items
 
 
-def upd_one(item: Any) -> Any:
+def upd_one[T](item: T) -> T:
     with create_session() as session:
         try:
             session.add(item)

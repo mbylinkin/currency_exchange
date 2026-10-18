@@ -13,7 +13,7 @@ class ExchangeRateBase(BaseModel):
     )
 
     @field_serializer("rate", when_used="json")
-    def serialize_rate(rate: Decimal) -> float:
+    def serialize_rate(self, rate: Decimal) -> float:
         return float(rate)
 
 
