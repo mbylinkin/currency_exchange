@@ -47,7 +47,7 @@ uv run alembic revision --autogenerate -m "msg"                              # n
 
 On this Windows machine Playwright can't download Chromium (TLS interception), so run e2e on the installed Edge: `make test-e2e E2E_ARGS="--browser-channel msedge"`. CI uses the downloaded Chromium.
 
-CI (`.github/workflows/ci.yml`) runs four jobs on every PR: pre-commit (hygiene hooks + ruff), `make typecheck` + `make check-migrations` + `make test-cov`, `make test-e2e`, and a `docker compose` smoke test.
+CI (`.github/workflows/ci.yml`) runs four jobs on every PR: pre-commit (hygiene hooks + ruff), `make typecheck` + `make check-migrations` + `make test-cov`, `make test-e2e`, and a `docker compose` smoke test. Jobs run on a pinned `ubuntu-24.04`, not `ubuntu-latest`. Bump it by hand before GitHub retires the image.
 
 Docker: one `Dockerfile` with two targets. `api` (the default) installs only the app dependencies from `uv.lock`, runs as a non-root user, applies migrations on start and keeps SQLite in the `/data` volume. `frontend` downloads the pinned frontend at build time and serves it with `e2e/frontend.py --no-fetch`. `.dockerignore` is an allowlist, so a new top-level file the app needs must be added there. The image's `--api-url` and `APP_CORS_ORIGINS` are the URLs as the browser on the host sees them (`localhost:8000` / `localhost:8080`), not compose service names. Alembic's `env.py` imports app settings, so any alembic command needs `APP_CORS_ORIGINS`/`APP_CORS_HEADERS` set: from `.env` locally, from the Makefile target in CI.
 
