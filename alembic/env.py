@@ -1,8 +1,5 @@
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-
 from alembic import context
 
 from src.models import Base
@@ -63,6 +60,7 @@ def run_migrations_online() -> None:
 
     """
     from src.database import engine
+
     connectable = engine
 
     # connectable = engine_from_config(

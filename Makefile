@@ -39,8 +39,8 @@ frontend:
 
 
 lint:
-	uv run ruff check src tests e2e
-	uv run ruff format src tests e2e
+	uv run ruff check .
+	uv run ruff format .
 
 
 # mypy --strict on src and e2e, relaxed for tests (config in pyproject.toml)
