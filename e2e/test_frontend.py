@@ -1,6 +1,6 @@
 import httpx2
 import pytest
-from playwright.sync_api import Page, expect
+from playwright.sync_api import Locator, Page, Response, expect
 
 
 def seed_currency(api: httpx2.Client, code: str, name: str, sign: str) -> None:
@@ -25,7 +25,7 @@ def usd_eur_gbp(api: httpx2.Client) -> None:
     seed_rate(api, "USD", "GBP", "0.8")
 
 
-def error_toast(page: Page):
+def error_toast(page: Page) -> Locator:
     return page.locator("#api-error-toast .toast-body")
 
 
@@ -183,14 +183,12 @@ def test_frontend_requests_are_not_redirected(
     page: Page, frontend: str, backend_url: str, usd_eur_gbp: None
 ) -> None:
     redirects: list[str] = []
-    page.on(
-        "response",
-        lambda resp: (
-            resp.url.startswith(backend_url)
-            and 300 <= resp.status < 400
-            and redirects.append(f"{resp.status} {resp.request.method} {resp.url}")
-        ),
-    )
+
+    def record_redirect(resp: Response) -> None:
+        if resp.url.startswith(backend_url) and 300 <= resp.status < 400:
+            redirects.append(f"{resp.status} {resp.request.method} {resp.url}")
+
+    page.on("response", record_redirect)
     page.goto(frontend)
     expect(page.locator(".currencies-table tbody tr")).to_have_count(3)
 

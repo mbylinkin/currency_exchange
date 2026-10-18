@@ -1,4 +1,4 @@
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 from typing import Any
 
 from fastapi import FastAPI, HTTPException, Request, status
@@ -39,7 +39,7 @@ class InternalServerError(DetailedHTTPException):
     STATUS_CODE = status.HTTP_500_INTERNAL_SERVER_ERROR
 
 
-def format_validation_errors(errors: Iterable[dict[str, Any]]) -> str:
+def format_validation_errors(errors: Iterable[Mapping[str, Any]]) -> str:
     messages = []
     for error in errors:
         field = error["loc"][-1] if error["loc"] else "request"
@@ -50,9 +50,8 @@ def format_validation_errors(errors: Iterable[dict[str, Any]]) -> str:
     return "; ".join(messages)
 
 
-async def http_exception_handler(
-    request: Request, exc: StarletteHTTPException
-) -> JSONResponse:
+async def http_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    assert isinstance(exc, StarletteHTTPException)
     return JSONResponse(
         status_code=exc.status_code,
         content={"message": exc.detail},
@@ -61,8 +60,9 @@ async def http_exception_handler(
 
 
 async def validation_exception_handler(
-    request: Request, exc: RequestValidationError | ValidationError
+    request: Request, exc: Exception
 ) -> JSONResponse:
+    assert isinstance(exc, RequestValidationError | ValidationError)
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
         content={"message": format_validation_errors(exc.errors())},

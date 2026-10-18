@@ -11,6 +11,7 @@ import functools
 import subprocess
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from typing import Any
 
 FRONTEND_REPO = "https://github.com/zhukovsd/currency-exchange-frontend"
 FRONTEND_COMMIT = "24a10a4e9085ddc32a3558cf7f22347f9bbc3e42"
@@ -43,7 +44,7 @@ def fetch_frontend(target: Path = FRONTEND_DIR, commit: str = FRONTEND_COMMIT) -
 
 
 class FrontendHandler(SimpleHTTPRequestHandler):
-    def __init__(self, *args, api_url: str, **kwargs) -> None:
+    def __init__(self, *args: Any, api_url: str, **kwargs: Any) -> None:
         self.api_url = api_url
         super().__init__(*args, directory=str(FRONTEND_DIR), **kwargs)
 
@@ -60,7 +61,7 @@ class FrontendHandler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
-    def log_message(self, format: str, *args) -> None:
+    def log_message(self, format: str, *args: Any) -> None:
         pass
 
 

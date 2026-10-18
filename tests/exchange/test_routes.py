@@ -52,7 +52,9 @@ def test_exchange_currency_rate_through_usd(
 
 
 def test_exchange_currency_rate_not_found(
-    app_client: TestClient, create_currency_eur, create_currency_gpb
+    app_client: TestClient,
+    create_currency_eur: models.Currency,
+    create_currency_gpb: models.Currency,
 ) -> None:
     resp = app_client.get(
         "/exchange", params={"from": "EUR", "to": "GBP", "amount": 1.0}
@@ -65,7 +67,9 @@ def test_exchange_currency_rate_not_found(
 
 
 def test_exchange_currency_not_found(
-    app_client: TestClient, create_currency_eur, create_currency_gpb
+    app_client: TestClient,
+    create_currency_eur: models.Currency,
+    create_currency_gpb: models.Currency,
 ) -> None:
     resp = app_client.get(
         "/exchange", params={"from": "EUR", "to": "GBP", "amount": 1.0}

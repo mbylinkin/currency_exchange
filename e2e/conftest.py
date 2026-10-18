@@ -21,7 +21,8 @@ ROOT_DIR = Path(__file__).parent.parent
 def free_port() -> int:
     with socket.socket() as sock:
         sock.bind(("127.0.0.1", 0))
-        return sock.getsockname()[1]
+        port: int = sock.getsockname()[1]
+        return port
 
 
 @pytest.fixture(scope="session")

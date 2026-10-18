@@ -18,6 +18,7 @@ dependencies = [
 dev = [
     "factory-boy>=3.3.3",
     "httpx2>=2.13.1",
+    "mypy>=2.4.0",
     "playwright>=1.64.0",
     "pre-commit>=4.7.0",
     "pytest>=9.1.1",
@@ -58,5 +59,27 @@ extend-immutable-calls = [
     "fastapi.Depends",
     "fastapi.Form",
     "fastapi.Query",
-    "fastapi.params.Query",
 ]
+
+[tool.mypy]
+files = ["src", "tests", "e2e"]
+plugins = ["pydantic.mypy"]
+strict = true
+
+[[tool.mypy.overrides]]
+# factory_boy is untyped: keep checking test bodies, but don't demand
+# annotations on every fixture and factory call
+module = ["tests.*"]
+disallow_untyped_defs = false
+disallow_untyped_calls = false
+disallow_subclassing_any = false
+
+[[tool.mypy.overrides]]
+# No type hints or stubs published
+module = ["sqlalchemy_utils"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+# factory_boy re-exports its API from submodules without __all__
+module = ["factory", "factory.*"]
+implicit_reexport = true
