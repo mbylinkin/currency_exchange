@@ -21,8 +21,8 @@ def create_session() -> Session:
 
 
 def get_session() -> Generator[Session]:
-    session = create_session()
     try:
+        session = create_session()
         yield session
     finally:
         session.close()
