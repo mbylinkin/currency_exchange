@@ -65,18 +65,31 @@ class FrontendHandler(SimpleHTTPRequestHandler):
         pass
 
 
-def make_server(port: int, api_url: str) -> ThreadingHTTPServer:
+def make_server(
+    port: int, api_url: str, host: str = "127.0.0.1"
+) -> ThreadingHTTPServer:
     handler = functools.partial(FrontendHandler, api_url=api_url.rstrip("/"))
-    return ThreadingHTTPServer(("127.0.0.1", port), handler)
+    return ThreadingHTTPServer((host, port), handler)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8080)
     parser.add_argument("--api-url", default="http://localhost:8000")
+    fetch = parser.add_mutually_exclusive_group()
+    fetch.add_argument(
+        "--fetch-only", action="store_true", help="download the frontend and exit"
+    )
+    fetch.add_argument(
+        "--no-fetch", action="store_true", help="serve the existing download as is"
+    )
     args = parser.parse_args()
 
-    fetch_frontend()
-    server = make_server(args.port, args.api_url)
+    if not args.no_fetch:
+        fetch_frontend()
+    if args.fetch_only:
+        raise SystemExit
+    server = make_server(args.port, args.api_url, args.host)
     print(f"Frontend: http://localhost:{args.port} -> API {args.api_url}")
     server.serve_forever()

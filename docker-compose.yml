@@ -1,0 +1,27 @@
+# API on :8000 and the spec's reference frontend on :8080.
+#   docker compose up --build
+# The SQLite DB lives in the "data" volume; `docker compose down -v` wipes it.
+services:
+  api:
+    build:
+      context: .
+      target: api
+    ports:
+      - "8000:8000"
+    environment:
+      APP_CORS_ORIGINS: '["http://localhost:8080"]'
+    volumes:
+      - data:/data
+
+  frontend:
+    build:
+      context: .
+      target: frontend
+    ports:
+      - "8080:8080"
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  data:

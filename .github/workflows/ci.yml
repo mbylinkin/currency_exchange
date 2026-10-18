@@ -43,3 +43,17 @@ jobs:
         with:
           name: e2e-test-results
           path: test-results/
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      # --wait returns once the api healthcheck passes
+      - run: docker compose up --build --detach --wait
+      - name: Smoke test
+        run: |
+          curl -fsS -X POST localhost:8000/currencies -d code=USD -d "name=US Dollar" -d 'sign=$'
+          curl -fsS localhost:8000/currencies | grep -q '"code":"USD"'
+          curl -fsS localhost:8080/js/app.js | grep -q 'http://localhost:8000'
+      - if: failure()
+        run: docker compose logs

@@ -1,0 +1,11 @@
+# Allowlist: only what the images need
+*
+!pyproject.toml
+!uv.lock
+!.python-version
+!alembic.ini
+!alembic/
+!run.py
+!src/
+!e2e/frontend.py
+**/__pycache__
