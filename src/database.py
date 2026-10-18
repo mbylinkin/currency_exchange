@@ -9,7 +9,7 @@ from src.exceptions import AlreadyExists
 
 engine = create_engine(
     settings.app.database_url,
-    echo=True,
+    echo=settings.app.debug,  # log SQL only in debug
     connect_args={"check_same_thread": False},
     poolclass=StaticPool,
 )
