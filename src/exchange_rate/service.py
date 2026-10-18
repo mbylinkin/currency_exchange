@@ -1,7 +1,7 @@
 from collections.abc import Iterable
 
 from sqlalchemy import select
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import aliased, contains_eager
 
 from src import database, models
 from src.currency import service as currency_service
@@ -10,29 +10,25 @@ from src.utils import parse_currency_pair
 
 
 def get_exc_rate_list() -> Iterable[models.ExchangeRates]:
-    stmt = select(models.ExchangeRates).options(
-        joinedload(models.ExchangeRates.base_currency, innerjoin="unnested"),
-        joinedload(models.ExchangeRates.target_currency, innerjoin="unnested"),
-    )
-    return database.fetch_all(stmt)
+    # Both currencies come eagerly through the model's lazy="joined"
+    return database.fetch_all(select(models.ExchangeRates))
 
 
 def get_exc_rate(code: str) -> models.ExchangeRates | None:
-    base_val_code, target_val_code = parse_currency_pair(code.upper())
+    base_code, target_code = parse_currency_pair(code.upper())
+    base = aliased(models.Currency)
+    target = aliased(models.Currency)
 
-    stmt = select(models.ExchangeRates).options(
-        joinedload(
-            models.ExchangeRates.base_currency.and_(
-                models.Currency.code == base_val_code
-            ),
-            innerjoin="unnested",
-        ),
-        joinedload(
-            models.ExchangeRates.target_currency.and_(
-                models.Currency.code == target_val_code
-            ),
-            innerjoin="unnested",
-        ),
+    # Filter with join + where, then fill the relationships from the same joins
+    stmt = (
+        select(models.ExchangeRates)
+        .join(base, models.ExchangeRates.base_currency)
+        .join(target, models.ExchangeRates.target_currency)
+        .where(base.code == base_code, target.code == target_code)
+        .options(
+            contains_eager(models.ExchangeRates.base_currency.of_type(base)),
+            contains_eager(models.ExchangeRates.target_currency.of_type(target)),
+        )
     )
     return database.fetch_one(stmt)
 
