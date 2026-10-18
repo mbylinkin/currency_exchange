@@ -21,6 +21,8 @@ uv lock --upgrade-package <pkg>
 
 Ruff's target version comes from `requires-python`. FastAPI's `Depends`/`Query`/`Form` defaults are whitelisted for bugbear B008 in `[tool.ruff.lint.flake8-bugbear]`. `alembic` is declared `known-third-party` for isort, because the local `alembic/` directory would otherwise make it first-party. After bumping ruff, set the same version as `rev` of `ruff-pre-commit` in `.pre-commit-config.yaml` (`pre-commit autoupdate` does it).
 
+Dependabot (`.github/dependabot.yml`) opens weekly PRs for `uv.lock` and for GitHub Actions. Minor and patch bumps come grouped into one PR, each major bump gets its own. Dependabot doesn't update `.pre-commit-config.yaml`, so when its PR bumps ruff, push `pre-commit autoupdate` onto the same branch.
+
 ```bash
 make install                            # uv sync: .venv with app + dev deps
 uv run playwright install chromium      # for e2e; or reuse an installed browser, see below
