@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 import sqlalchemy as sa
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -32,9 +34,9 @@ class Currency(Base):
 class ExchangeRates(Base):
     __tablename__ = "exchange_rates"
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    base_currency_id = sa.Column(sa.Integer, sa.ForeignKey("currency.id"))
-    target_currency_id = sa.Column(sa.Integer, sa.ForeignKey("currency.id"))
-    rate = sa.Column(sa.DECIMAL(10, 6))
+    base_currency_id: Mapped[int] = mapped_column(sa.ForeignKey("currency.id"))
+    target_currency_id: Mapped[int] = mapped_column(sa.ForeignKey("currency.id"))
+    rate: Mapped[Decimal] = mapped_column(sa.DECIMAL(10, 6))
 
     base_currency: Mapped[Currency] = relationship(
         foreign_keys=[base_currency_id], lazy="joined", innerjoin=True
