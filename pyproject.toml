@@ -6,9 +6,9 @@ readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "alembic>=1.20.0",
-    "fastapi>=0.143.3",
+    "fastapi>=0.156.8",
     "pydantic>=2.14.1",
-    "pydantic-settings>=2.16.0",
+    "pydantic-settings>=2.16.1",
     "python-multipart>=0.0.32",
     "sqlalchemy>=2.1.5",
     "uvicorn>=0.54.0",
@@ -17,13 +17,13 @@ dependencies = [
 [dependency-groups]
 dev = [
     "factory-boy>=3.3.3",
-    "httpx2>=2.13.1",
+    "httpx2>=2.16.0",
     "mypy>=2.4.0",
     "playwright>=1.64.0",
     "pre-commit>=4.7.0",
     "pytest>=9.1.1",
     "pytest-cov>=7.1.0",
-    "pytest-env>=1.8.0",
+    "pytest-env>=1.8.1",
     "pytest-playwright>=0.10.0",
     "pytest-sugar>=1.1.1",
     "ruff>=0.17.1",
