@@ -1,7 +1,7 @@
 # API image (default target) and the spec's reference frontend (target "frontend").
 # Both are run together by docker-compose.yml.
 
-FROM ghcr.io/astral-sh/uv:0.13.1 AS uv
+FROM ghcr.io/astral-sh/uv:0.13.5 AS uv
 
 
 FROM python:3.14-slim AS builder
