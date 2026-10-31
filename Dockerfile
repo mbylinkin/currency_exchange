@@ -4,7 +4,7 @@
 FROM ghcr.io/astral-sh/uv:0.13.1 AS uv
 
 
-FROM python:3.14-slim AS builder
+FROM python:3.15-slim AS builder
 COPY --from=uv /uv /bin/uv
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_PYTHON_DOWNLOADS=0
 WORKDIR /app
@@ -14,7 +14,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-dev --no-install-project
 
 
-FROM python:3.14-slim AS frontend-fetch
+FROM python:3.15-slim AS frontend-fetch
 RUN apt-get update \
     && apt-get install -y --no-install-recommends git ca-certificates \
     && rm -rf /var/lib/apt/lists/*
@@ -23,7 +23,7 @@ COPY e2e/frontend.py e2e/
 RUN python e2e/frontend.py --fetch-only && rm -rf e2e/frontend/.git
 
 
-FROM python:3.14-slim AS frontend
+FROM python:3.15-slim AS frontend
 RUN useradd --create-home app
 WORKDIR /app
 COPY --from=frontend-fetch /app/e2e ./e2e
@@ -34,7 +34,7 @@ EXPOSE 8080
 CMD ["python", "e2e/frontend.py", "--no-fetch", "--host", "0.0.0.0", "--port", "8080",      "--api-url", "http://localhost:8000"]
 
 
-FROM python:3.14-slim AS api
+FROM python:3.15-slim AS api
 RUN useradd --create-home app && mkdir /data && chown app /data
 WORKDIR /app
 COPY --from=builder /app/.venv ./.venv
