@@ -115,7 +115,9 @@ To use an already installed browser instead of the downloaded Chromium, run `mak
 ## Development
 
 ```bash
-make lint               # ruff check + ruff format
+make check              # everything CI checks except e2e and docker
+make lint               # pre-commit hooks (whitespace/YAML, ruff) on all files
+make fix                # ruff autofix + format
 make typecheck          # mypy (strict)
 make check-migrations   # fails if models.py changed without a migration
 uv run alembic revision --autogenerate -m "message"   # new migration after changing models.py
@@ -127,13 +129,12 @@ uv run alembic revision --autogenerate -m "message"   # new migration after chan
 uv run pre-commit install
 ```
 
-Runs whitespace/YAML checks and ruff (lint + format) on every commit.
+Runs whitespace/YAML checks and ruff (lint + format) on every commit, and mypy on every push.
 
 ### CI
 
-GitHub Actions run four jobs on every pull request:
-* `lint`: the pre-commit hooks
-* `test`: `make typecheck`, `make check-migrations`, `make test-cov`
+GitHub Actions run three jobs on every pull request:
+* `check`: `make check` (pre-commit hooks, mypy, migration check, tests with coverage)
 * `e2e`: `make test-e2e`
 * `docker`: builds the images, starts them with `docker compose`, adds a currency through the API and checks the frontend is served
 

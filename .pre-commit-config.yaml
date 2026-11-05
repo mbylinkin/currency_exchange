@@ -1,5 +1,9 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
+# Fast checks on staged files on commit, whole-project checks on push.
+# `make lint` runs the commit stage on all files; CI runs everything via `make check`.
+default_install_hook_types: [pre-commit, pre-push]
+default_stages: [pre-commit]
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
@@ -15,3 +19,11 @@ repos:
     -   id: ruff-check
         args: [--fix]
     -   id: ruff-format
+-   repo: local
+    hooks:
+    -   id: mypy
+        name: mypy
+        entry: uv run mypy
+        language: system
+        pass_filenames: false
+        stages: [pre-push]

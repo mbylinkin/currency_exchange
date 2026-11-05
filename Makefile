@@ -47,8 +47,20 @@ docker-down:
 	docker compose down
 
 
+# Every check that CI runs, except e2e and the docker smoke test.
+# Must pass before a change is done.
+check: lint typecheck check-migrations test-cov
+
+
+# All pre-commit hooks (hygiene + ruff) on the whole repo. Fails on any finding;
+# hooks with an autofix also apply it, so run it again after reviewing the diff.
 lint:
-	uv run ruff check .
+	uv run pre-commit run --all-files --show-diff-on-failure
+
+
+# Safe autofixes only
+fix:
+	uv run ruff check --fix .
 	uv run ruff format .
 
 

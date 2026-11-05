@@ -8,27 +8,21 @@ on:
 # Runner image is pinned (not ubuntu-latest), so GitHub moving the alias to a
 # new Ubuntu can't change the build. Bump it deliberately; Dependabot doesn't.
 jobs:
-  lint:
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
-        with:
-          python-version-file: .python-version
-      - uses: pre-commit/action@v3.0.1
-
-  test:
+  # The same command developers run before a change is done
+  check:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
       # --locked fails if uv.lock is out of date with pyproject.toml
       - run: uv sync --locked
-      - run: make typecheck
-      - run: make check-migrations
-      - run: make test-cov
+      - run: make check
 
   e2e:
     runs-on: ubuntu-24.04
