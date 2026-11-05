@@ -24,6 +24,18 @@ repos:
     hooks:
     # Workflows and dependabot.yml; shellcheck (built from Go) checks run: steps
     -   id: jactionlint-shellcheck
+-   repo: https://github.com/betterleaks/betterleaks
+    rev: v1.10.0
+    hooks:
+    # Staged diff on commit
+    -   id: betterleaks
+    # Whole git history on push and in `make secrets` (CI). Live validation
+    # (--validation) stays off: findings are never sent anywhere.
+    -   id: betterleaks
+        alias: betterleaks-history
+        name: Detect hardcoded secrets in git history
+        entry: betterleaks git --redact --no-banner
+        stages: [pre-push, manual]
 -   repo: local
     hooks:
     -   id: mypy

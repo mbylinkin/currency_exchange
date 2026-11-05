@@ -35,7 +35,8 @@ make run-dev                      # migrate, then python run.py with APP_DEBUG=t
 make run-prod                     # same without reload and SQL log (APP_DEBUG from .env, default false)
 make frontend                     # spec's reference frontend on :8080 -> API on :8000
 make docker-up                    # both of the above in containers (docker compose); docker-down stops them
-make check                        # every CI check except e2e and docker: lint + typecheck + check-migrations + test-cov
+make check                        # every CI check except e2e and docker: lint + secrets + typecheck + check-migrations + test-cov
+make secrets                      # betterleaks over the whole git history (also a pre-push hook; the commit hook scans the staged diff)
 make lint                         # all pre-commit hooks on the whole repo; fails on findings (ruff hooks also autofix)
 make fix                          # safe autofixes only: ruff check --fix + ruff format
 make typecheck                    # mypy: strict everywhere, relaxed for tests/ (also a pre-push hook)
@@ -48,6 +49,8 @@ uv run alembic revision --autogenerate -m "msg"                              # n
 ```
 
 On this Windows machine Playwright can't download Chromium (TLS interception), so run e2e on the installed Edge: `make test-e2e E2E_ARGS="--browser-channel msedge"`. CI uses the downloaded Chromium.
+
+Secrets: never commit a real one; config comes from `.env` (gitignored). A secret that reached a commit must be revoked, not just removed: it stays in history. For a false positive, add its fingerprint to `.betterleaksignore` with a comment saying why; don't disable the rule. Betterleaks' `--validation` (sending found secrets to live APIs) stays off.
 
 `make check` must pass before a change is done. New checks go into it (usually as a pre-commit hook), never into CI alone. Pre-commit runs the fast hooks on staged files at commit and mypy at push; `uv run pre-commit install` sets up both.
 
