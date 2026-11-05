@@ -49,7 +49,7 @@ docker-down:
 
 # Every check that CI runs, except e2e and the docker smoke test.
 # Must pass before a change is done.
-check: lint secrets typecheck check-migrations test-cov
+check: lint secrets vulns typecheck check-migrations test-cov
 
 
 # All pre-commit hooks (hygiene + ruff) on the whole repo. Fails on any finding;
@@ -62,6 +62,12 @@ lint:
 # only sees the staged diff, so this is the check that CI relies on.
 secrets:
 	uv run pre-commit run betterleaks-history --all-files --hook-stage manual
+
+
+# Known vulnerabilities in uv.lock (osv-scanner, needs the network).
+# Also runs weekly in CI: a new advisory can fail it without any change here.
+vulns:
+	uv run pre-commit run osv-scanner --all-files --hook-stage manual
 
 
 # Safe autofixes only
