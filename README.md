@@ -119,6 +119,7 @@ make check              # everything CI checks except e2e and docker
 make lint               # pre-commit hooks (whitespace/YAML, ruff) on all files
 make fix                # ruff autofix + format
 make secrets            # scan the git history for committed secrets (betterleaks)
+make vulns              # known vulnerabilities in uv.lock (osv-scanner)
 make typecheck          # mypy (strict)
 make check-migrations   # fails if models.py changed without a migration
 uv run alembic revision --autogenerate -m "message"   # new migration after changing models.py
@@ -135,8 +136,10 @@ Runs whitespace/YAML checks and ruff (lint + format) on every commit, and mypy o
 ### CI
 
 GitHub Actions run three jobs on every pull request:
-* `check`: `make check` (pre-commit hooks, secrets scan of the git history, mypy, migration check, tests with coverage)
+* `check`: `make check` (pre-commit hooks, secrets scan of the git history, vulnerability scan of uv.lock, mypy, migration check, tests with coverage)
 * `e2e`: `make test-e2e`
 * `docker`: builds the images, starts them with `docker compose`, adds a currency through the API and checks the frontend is served
+
+A scheduled workflow runs `make vulns` every Monday, so a newly published advisory shows up even without new commits.
 
 Dependabot opens weekly pull requests for Python dependencies, Docker base images and GitHub Actions.

@@ -36,6 +36,14 @@ repos:
         name: Detect hardcoded secrets in git history
         entry: betterleaks git --redact --no-banner
         stages: [pre-push, manual]
+-   repo: https://github.com/google/osv-scanner
+    rev: v2.7.0
+    hooks:
+    # Known vulnerabilities in uv.lock. Needs the network (osv.dev), so it runs
+    # on push and in `make vulns`, not on commit. Exceptions: osv-scanner.toml
+    -   id: osv-scanner
+        args: [scan, source, --lockfile=uv.lock]
+        stages: [pre-push, manual]
 -   repo: local
     hooks:
     -   id: mypy

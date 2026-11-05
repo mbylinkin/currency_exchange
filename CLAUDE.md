@@ -35,8 +35,9 @@ make run-dev                      # migrate, then python run.py with APP_DEBUG=t
 make run-prod                     # same without reload and SQL log (APP_DEBUG from .env, default false)
 make frontend                     # spec's reference frontend on :8080 -> API on :8000
 make docker-up                    # both of the above in containers (docker compose); docker-down stops them
-make check                        # every CI check except e2e and docker: lint + secrets + typecheck + check-migrations + test-cov
+make check                        # every CI check except e2e and docker: lint + secrets + vulns + typecheck + check-migrations + test-cov
 make secrets                      # betterleaks over the whole git history (also a pre-push hook; the commit hook scans the staged diff)
+make vulns                        # osv-scanner on uv.lock against osv.dev (needs the network; also a pre-push hook and a weekly CI run)
 make lint                         # all pre-commit hooks on the whole repo; fails on findings (ruff hooks also autofix)
 make fix                          # safe autofixes only: ruff check --fix + ruff format
 make typecheck                    # mypy: strict everywhere, relaxed for tests/ (also a pre-push hook)
@@ -52,9 +53,11 @@ On this Windows machine Playwright can't download Chromium (TLS interception), s
 
 Secrets: never commit a real one; config comes from `.env` (gitignored). A secret that reached a commit must be revoked, not just removed: it stays in history. For a false positive, add its fingerprint to `.betterleaksignore` with a comment saying why; don't disable the rule. Betterleaks' `--validation` (sending found secrets to live APIs) stays off.
 
+Vulnerabilities: fix a finding by upgrading the package (`uv lock --upgrade-package <pkg>`). If no fix exists or it doesn't apply, ignore that one advisory in `osv-scanner.toml` (`[[IgnoredVulns]]` with `id`, `reason` and `ignoreUntil` at most 3 months ahead), never the whole package.
+
 `make check` must pass before a change is done. New checks go into it (usually as a pre-commit hook), never into CI alone. Pre-commit runs the fast hooks on staged files at commit and mypy at push; `uv run pre-commit install` sets up both.
 
-CI (`.github/workflows/ci.yml`) runs three jobs on every PR: `make check`, `make test-e2e`, and a `docker compose` smoke test. Jobs run on a pinned `ubuntu-24.04`, not `ubuntu-latest`. Bump it by hand before GitHub retires the image. jactionlint (a pre-commit hook, so part of `make check`) lints the workflow and `dependabot.yml`: actions are pinned to a full commit SHA with the tag in a comment (Dependabot updates both), the token is read-only (`permissions: contents: read`), every job has `timeout-minutes`, and a new push cancels older runs of the same PR.
+CI (`.github/workflows/ci.yml`) runs three jobs on every PR: `make check`, `make test-e2e`, and a `docker compose` smoke test. `.github/workflows/scheduled.yml` reruns the checks that depend on external data (`make vulns`) every Monday, because a new advisory fails them without any change here. Jobs run on a pinned `ubuntu-24.04`, not `ubuntu-latest`. Bump it by hand before GitHub retires the image. jactionlint (a pre-commit hook, so part of `make check`) lints the workflow and `dependabot.yml`: actions are pinned to a full commit SHA with the tag in a comment (Dependabot updates both), the token is read-only (`permissions: contents: read`), every job has `timeout-minutes`, and a new push cancels older runs of the same PR.
 
 Docker: one `Dockerfile` with two targets. `api` (the default) installs only the app dependencies from `uv.lock`, runs as a non-root user, applies migrations on start and keeps SQLite in the `/data` volume. `frontend` downloads the pinned frontend at build time and serves it with `e2e/frontend.py --no-fetch`. `.dockerignore` is an allowlist, so a new top-level file the app needs must be added there. The image's `--api-url` and `APP_CORS_ORIGINS` are the URLs as the browser on the host sees them (`localhost:8000` / `localhost:8080`), not compose service names. Alembic's `env.py` imports app settings, so any alembic command needs `APP_CORS_ORIGINS`/`APP_CORS_HEADERS` set: from `.env` locally, from the Makefile target in CI.
 
