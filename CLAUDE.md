@@ -21,7 +21,7 @@ uv lock --upgrade-package <pkg>
 
 Ruff's target version comes from `requires-python`. FastAPI's `Depends`/`Query`/`Form` defaults are whitelisted for bugbear B008 in `[tool.ruff.lint.flake8-bugbear]`. `alembic` is declared `known-third-party` for isort, because the local `alembic/` directory would otherwise make it first-party. After bumping ruff, set the same version as `rev` of `ruff-pre-commit` in `.pre-commit-config.yaml` (`pre-commit autoupdate` does it).
 
-Dependabot (`.github/dependabot.yml`) opens weekly PRs for `uv.lock`, the Dockerfile base images and GitHub Actions. Minor and patch bumps come grouped into one PR, each major bump gets its own. Dependabot doesn't update `.pre-commit-config.yaml`, so when its PR bumps ruff, push `pre-commit autoupdate` onto the same branch.
+Dependabot (`.github/dependabot.yml`) opens weekly PRs for `uv.lock`, the Dockerfile base images and GitHub Actions. Minor and patch bumps come grouped into one PR, each major bump gets its own. A 7-day `cooldown` skips freshly published versions. Minor bumps of the `python` image are ignored: a new Python goes into `.python-version`, `requires-python` and the Dockerfile together, by hand. Dependabot doesn't update `.pre-commit-config.yaml`, so when its PR bumps ruff, push `pre-commit autoupdate` onto the same branch.
 
 ```bash
 make install                            # uv sync: .venv with app + dev deps
@@ -51,7 +51,7 @@ On this Windows machine Playwright can't download Chromium (TLS interception), s
 
 `make check` must pass before a change is done. New checks go into it (usually as a pre-commit hook), never into CI alone. Pre-commit runs the fast hooks on staged files at commit and mypy at push; `uv run pre-commit install` sets up both.
 
-CI (`.github/workflows/ci.yml`) runs three jobs on every PR: `make check`, `make test-e2e`, and a `docker compose` smoke test. Jobs run on a pinned `ubuntu-24.04`, not `ubuntu-latest`. Bump it by hand before GitHub retires the image.
+CI (`.github/workflows/ci.yml`) runs three jobs on every PR: `make check`, `make test-e2e`, and a `docker compose` smoke test. Jobs run on a pinned `ubuntu-24.04`, not `ubuntu-latest`. Bump it by hand before GitHub retires the image. jactionlint (a pre-commit hook, so part of `make check`) lints the workflow and `dependabot.yml`: actions are pinned to a full commit SHA with the tag in a comment (Dependabot updates both), the token is read-only (`permissions: contents: read`), every job has `timeout-minutes`, and a new push cancels older runs of the same PR.
 
 Docker: one `Dockerfile` with two targets. `api` (the default) installs only the app dependencies from `uv.lock`, runs as a non-root user, applies migrations on start and keeps SQLite in the `/data` volume. `frontend` downloads the pinned frontend at build time and serves it with `e2e/frontend.py --no-fetch`. `.dockerignore` is an allowlist, so a new top-level file the app needs must be added there. The image's `--api-url` and `APP_CORS_ORIGINS` are the URLs as the browser on the host sees them (`localhost:8000` / `localhost:8080`), not compose service names. Alembic's `env.py` imports app settings, so any alembic command needs `APP_CORS_ORIGINS`/`APP_CORS_HEADERS` set: from `.env` locally, from the Makefile target in CI.
 

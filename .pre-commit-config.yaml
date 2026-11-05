@@ -19,6 +19,11 @@ repos:
     -   id: ruff-check
         args: [--fix]
     -   id: ruff-format
+-   repo: https://github.com/jdx/jactionlint
+    rev: v2.5.0
+    hooks:
+    # Workflows and dependabot.yml; shellcheck (built from Go) checks run: steps
+    -   id: jactionlint-shellcheck
 -   repo: local
     hooks:
     -   id: mypy
