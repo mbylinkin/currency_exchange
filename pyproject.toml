@@ -61,6 +61,19 @@ directory = "tests/coverage"
 fail_under = 80
 skip_empty = true
 
+[tool.ruff.lint]
+# On top of ruff's defaults (E4, E7, E9, F)
+extend-select = ["E", "W", "I", "B", "UP", "S", "SIM", "C4", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+# assert is how pytest checks
+"tests/**" = ["S101"]
+"e2e/**" = ["S101"]
+# subprocess with fixed argument lists (git for the frontend download, uvicorn
+# for the test server); nothing comes from user input
+"e2e/frontend.py" = ["S603"]
+"e2e/conftest.py" = ["S603"]
+
 [tool.ruff.lint.isort]
 # The local alembic/ directory would otherwise make the alembic package first-party
 known-third-party = ["alembic"]
