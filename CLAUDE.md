@@ -35,7 +35,7 @@ make run-dev                      # migrate, then python run.py with APP_DEBUG=t
 make run-prod                     # same without reload and SQL log (APP_DEBUG from .env, default false)
 make frontend                     # spec's reference frontend on :8080 -> API on :8000
 make docker-up                    # both of the above in containers (docker compose); docker-down stops them
-make check                        # every CI check except e2e and docker: lint + secrets + vulns + typecheck + check-migrations + test-cov
+make check                        # every CI check except e2e and docker: lint + secrets + vulns + typecheck + check-migrations + test-cov + diff-cover
 make secrets                      # betterleaks over the whole git history (also a pre-push hook; the commit hook scans the staged diff)
 make vulns                        # osv-scanner on uv.lock against osv.dev (needs the network; also a pre-push hook and a weekly CI run)
 make lint                         # all pre-commit hooks on the whole repo; fails on findings (ruff hooks also autofix)
@@ -43,6 +43,7 @@ make fix                          # safe autofixes only: ruff check --fix + ruff
 make typecheck                    # mypy: strict everywhere, relaxed for tests/ (also a pre-push hook)
 make test                         # unit/integration tests (tests/ only)
 make test-cov                     # same + coverage (fails under 80%), HTML in tests/coverage/
+make diff-cover                   # lines changed vs origin/main in src/ must be >= 90% covered (reads coverage.xml from test-cov)
 make test-e2e                     # browser tests in e2e/
 
 uv run pytest tests/exchange/test_routes.py::test_exchange_currency_direct   # single test
