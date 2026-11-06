@@ -77,6 +77,11 @@ vulns:
 	uv run pre-commit run osv-scanner --all-files --hook-stage manual
 
 
+# Regenerate openapi.json from the app; commit it with the API change
+openapi:
+	uv run python scripts/openapi.py
+
+
 # Safe autofixes only
 fix:
 	uv run ruff check --fix .

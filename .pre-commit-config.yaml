@@ -51,6 +51,11 @@ repos:
     # sync with rev. Needs a running Docker daemon (Docker Desktop on Windows).
     -   id: hadolint-docker
         entry: ghcr.io/hadolint/hadolint:v2.15.1@sha256:32dac94127fd60b7b7e3fbfc65e1383b9b5e25c9bfd7b8536de7a539fe68a12d hadolint
+-   repo: https://github.com/oasdiff/oasdiff
+    rev: v1.35.0
+    hooks:
+    # Breaking API changes: openapi.json against its version on origin/main
+    -   id: oasdiff-breaking
 -   repo: local
     hooks:
     # typos, rumdl and agnix are dev dependencies: versions live in uv.lock
@@ -96,6 +101,13 @@ repos:
         language: system
         pass_filenames: false
         files: ^(ast-grep/.*|sgconfig\.yml)$
+    # openapi.json must match what the app generates (make openapi rewrites it)
+    -   id: openapi
+        name: openapi.json is current
+        entry: uv run python scripts/openapi.py --check
+        language: system
+        pass_filenames: false
+        files: ^(src/.*\.py|scripts/openapi\.py|openapi\.json|uv\.lock)$
     -   id: mypy
         name: mypy
         entry: uv run mypy

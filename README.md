@@ -126,6 +126,7 @@ To use an already installed browser instead of the downloaded Chromium, run `mak
 make check              # everything CI checks except e2e and docker (needs Docker running for hadolint)
 make lint               # pre-commit hooks (whitespace/YAML, ruff) on all files
 make fix                # ruff autofix + format, Markdown format
+make openapi            # regenerate openapi.json (the committed API contract)
 make secrets            # scan the git history for committed secrets (betterleaks)
 make vulns              # known vulnerabilities in uv.lock (osv-scanner)
 make typecheck          # mypy (strict)
