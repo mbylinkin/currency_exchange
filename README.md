@@ -127,6 +127,7 @@ make check              # everything CI checks except e2e and docker (needs Dock
 make lint               # pre-commit hooks (whitespace/YAML, ruff) on all files
 make fix                # ruff autofix + format, Markdown format
 make openapi            # regenerate openapi.json (the committed API contract)
+make links              # check links in the Markdown files (lychee, needs Docker)
 make secrets            # scan the git history for committed secrets (betterleaks)
 make vulns              # known vulnerabilities in uv.lock (osv-scanner)
 make typecheck          # mypy (strict)
@@ -151,6 +152,6 @@ GitHub Actions run three jobs on every pull request:
 * `e2e`: the e2e tests, inside the official Playwright image (browsers preinstalled)
 * `docker`: builds the images, starts them with `docker compose`, adds a currency through the API and checks the frontend is served
 
-A scheduled workflow runs `make vulns` every Monday, so a newly published advisory shows up even without new commits.
+A scheduled workflow runs `make vulns` and `make links` every Monday, so a newly published advisory or a link that stopped working shows up even without new commits.
 
 Dependabot opens weekly pull requests for Python dependencies, Docker base images and GitHub Actions.

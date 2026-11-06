@@ -51,6 +51,16 @@ repos:
     # sync with rev. Needs a running Docker daemon (Docker Desktop on Windows).
     -   id: hadolint-docker
         entry: ghcr.io/hadolint/hadolint:v2.15.1@sha256:32dac94127fd60b7b7e3fbfc65e1383b9b5e25c9bfd7b8536de7a539fe68a12d hadolint
+-   repo: https://github.com/lycheeverse/lychee
+    rev: lychee-v0.24.2
+    hooks:
+    # Broken links in Markdown (config in lychee.toml). Needs the network and
+    # depends on other sites, so only `make links` and the weekly CI run use it.
+    # Docker image pinned by digest; keep it in sync with rev.
+    -   id: lychee-docker
+        entry: lycheeverse/lychee:0.24.2@sha256:e2d19e57cf6ab037026f20b8e449a1f30d9d7f81eef4194763aab2eab20bd28d
+        types: [markdown]
+        stages: [manual]
 -   repo: https://github.com/oasdiff/oasdiff
     rev: v1.35.0
     hooks:
