@@ -130,6 +130,7 @@ make secrets            # scan the git history for committed secrets (betterleak
 make vulns              # known vulnerabilities in uv.lock (osv-scanner)
 make typecheck          # mypy (strict)
 make check-migrations   # fails if models.py changed without a migration
+make migrations-immutable  # fails if a migration that is already in main was changed
 uv run alembic revision --autogenerate -m "message"   # new migration after changing models.py
 ```
 
