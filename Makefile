@@ -23,6 +23,13 @@ check-migrations:
 	rm -f .migrations-check.db
 
 
+# A migration that is already in origin/main may not be changed, renamed or
+# deleted: databases have applied it. Fix forward with a new revision.
+# Compares with the merge base, so uncommitted edits count too.
+migrations-immutable:
+	@changed=$$(git diff --name-only --diff-filter=DMR $$(git merge-base origin/main HEAD) -- alembic/versions/); 	if [ -n "$$changed" ]; then 		echo "Shipped migrations changed (add a new revision instead):"; echo "$$changed"; exit 1; 	fi; 	echo "Shipped migrations unchanged"
+
+
 run-dev: export APP_DEBUG = true
 run-dev: migrate
 	uv run python run.py
@@ -49,7 +56,7 @@ docker-down:
 
 # Every check that CI runs, except e2e and the docker smoke test.
 # Must pass before a change is done.
-check: lint secrets vulns typecheck check-migrations test-cov diff-cover
+check: lint secrets vulns typecheck check-migrations migrations-immutable test-cov diff-cover
 
 
 # All pre-commit hooks (hygiene + ruff) on the whole repo. Fails on any finding;
