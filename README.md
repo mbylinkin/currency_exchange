@@ -115,7 +115,7 @@ To use an already installed browser instead of the downloaded Chromium, run `mak
 ## Development
 
 ```bash
-make check              # everything CI checks except e2e and docker
+make check              # everything CI checks except e2e and docker (needs Docker running for hadolint)
 make lint               # pre-commit hooks (whitespace/YAML, ruff) on all files
 make fix                # ruff autofix + format
 make secrets            # scan the git history for committed secrets (betterleaks)
@@ -136,7 +136,7 @@ Runs whitespace/YAML checks and ruff (lint + format) on every commit, and mypy o
 ### CI
 
 GitHub Actions run three jobs on every pull request:
-* `check`: `make check` (pre-commit hooks, secrets scan of the git history, vulnerability scan of uv.lock, mypy, migration check, tests with coverage)
+* `check`: `make check` (pre-commit hooks incl. hadolint for the Dockerfile, secrets scan of the git history, vulnerability scan of uv.lock, mypy, migration check, tests with coverage)
 * `e2e`: `make test-e2e`
 * `docker`: builds the images, starts them with `docker compose`, adds a currency through the API and checks the frontend is served
 
