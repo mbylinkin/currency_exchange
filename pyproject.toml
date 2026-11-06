@@ -21,6 +21,7 @@ dev = [
     "deptry>=0.25.1",
     "factory-boy>=3.3.3",
     "httpx2>=2.16.0",
+    "import-linter>=2.15",
     "mypy>=2.4.1",
     "playwright>=1.64.1",
     "pre-commit>=4.7.0",
@@ -100,3 +101,31 @@ extend_exclude = ["e2e"]
 [tool.deptry.per_rule_ignores]
 # FastAPI needs python-multipart at runtime to parse Form(...) bodies; nothing imports it
 DEP002 = ["python-multipart"]
+
+[tool.importlinter]
+root_package = "src"
+
+[[tool.importlinter.contracts]]
+name = "Each domain package: router -> service -> schemas / exceptions"
+type = "layers"
+containers = ["src.currency", "src.exchange", "src.exchange_rate"]
+layers = ["router", "service", "schemas | exceptions"]
+
+[[tool.importlinter.contracts]]
+name = "Domains depend one way: exchange -> exchange_rate -> currency"
+type = "layers"
+layers = ["src.main", "src.exchange", "src.exchange_rate", "src.currency"]
+# Shared modules (database, models, exceptions, ...) sit outside the layers
+exhaustive = false
+
+[[tool.importlinter.contracts]]
+name = "Only main imports routers"
+type = "forbidden"
+source_modules = ["src.*.service", "src.*.schemas", "src.*.exceptions"]
+forbidden_modules = ["src.*.router"]
+
+[[tool.importlinter.contracts]]
+name = "Shared modules don't import domain packages"
+type = "forbidden"
+source_modules = ["src.constants", "src.database", "src.exceptions", "src.models", "src.settings", "src.utils"]
+forbidden_modules = ["src.main", "src.currency", "src.exchange", "src.exchange_rate"]
