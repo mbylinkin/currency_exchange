@@ -1,0 +1,24 @@
+id: no-trailing-slash-route
+language: python
+severity: error
+message: >-
+  Route paths match the spec exactly, without a trailing slash; otherwise the spec path answers with a 307 redirect.
+note: >-
+  The empty-code routes (/currency/, /exchangeRate/) are the exception: they only return a 400 and are marked include_in_schema=False.
+files:
+  - src/**/router.py
+rule:
+  any:
+    - pattern: $ROUTER.$METHOD($PATH)
+    - pattern: $ROUTER.$METHOD($PATH, $$$)
+  not:
+    has:
+      stopBy: end
+      kind: keyword_argument
+      regex: ^include_in_schema\s*=\s*False$
+constraints:
+  METHOD:
+    regex: ^(get|post|put|patch|delete|api_route)$
+  PATH:
+    kind: string
+    regex: /["']$

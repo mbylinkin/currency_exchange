@@ -1,0 +1,28 @@
+id: no-response-schema-limits
+language: python
+severity: error
+message: >-
+  Input limits (ge/gt/le/lt/decimal_places/max_digits) belong on Create/Update schemas only. On a schema used for responses, stored data outside them turns a GET into a 500 (#62).
+note: >-
+  Put the limit on the input schema, e.g. through an Annotated type like exchange_rate.schemas.InputRate.
+files:
+  - src/**/schemas.py
+rule:
+  kind: keyword_argument
+  has:
+    field: name
+    regex: ^(ge|gt|le|lt|decimal_places|max_digits)$
+  inside:
+    kind: argument_list
+    inside:
+      kind: call
+      has:
+        field: function
+        regex: ^Field$
+      inside:
+        stopBy: end
+        kind: class_definition
+        not:
+          has:
+            field: name
+            regex: (Create|Update)$

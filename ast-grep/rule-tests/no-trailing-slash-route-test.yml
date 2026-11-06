@@ -1,0 +1,21 @@
+id: no-trailing-slash-route
+valid:
+  - |
+    @router.get("/currencies", response_model=list[schemas.Currency])
+    def f(): ...
+  - |
+    @router.get("/currency/{code}")
+    def f(): ...
+  - |
+    @router.get("/currency/", response_model=schemas.Currency, include_in_schema=False)
+    def f(): ...
+invalid:
+  - |
+    @router.get("/currencies/", response_model=list[schemas.Currency])
+    def f(): ...
+  - |
+    @router.post("/exchangeRates/")
+    def f(): ...
+  - |
+    @router.patch('/exchangeRate/{code}/', include_in_schema=True)
+    def f(): ...

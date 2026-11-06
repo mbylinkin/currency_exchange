@@ -1,0 +1,23 @@
+id: no-response-schema-limits
+valid:
+  - |
+    class ExchangeRateCreate(ExchangeRateBase):
+        rate: Decimal = Field(..., ge=0.000001, decimal_places=6)
+  - |
+    class CurrencyUpdate(BaseModel):
+        amount: Decimal = Field(gt=0)
+  - |
+    InputRate = Annotated[Decimal, Field(ge=0.000001, decimal_places=6)]
+  - |
+    class ExchangeRate(ExchangeRateBase):
+        rate: Decimal = Field(..., description="Currency rate")
+invalid:
+  - |
+    class ExchangeRateBase(BaseModel):
+        rate: Decimal = Field(..., ge=0.000001, decimal_places=6)
+  - |
+    class Exchange(BaseModel):
+        amount: Decimal = Field(..., gt=0)
+  - |
+    class Currency(BaseModel):
+        rate: Decimal = Field(max_digits=10)
