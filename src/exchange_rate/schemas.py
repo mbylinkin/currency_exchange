@@ -1,16 +1,20 @@
 from decimal import Decimal
-from typing import Self
+from typing import Annotated, Self
 
 from fastapi import Form
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field, field_serializer
 
 from src.currency.schemas import Currency
 
+# Limits for rates the client sends. Only input schemas use it: on a response
+# schema a stored rate outside these limits would turn into a 500 (#62).
+InputRate = Annotated[
+    Decimal, Field(description="Currency rate", ge=0.000001, decimal_places=6)
+]
+
 
 class ExchangeRateBase(BaseModel):
-    rate: Decimal = Field(
-        ..., description="Currency rate", ge=0.000001, decimal_places=6
-    )
+    rate: Decimal = Field(..., description="Currency rate")
 
     @field_serializer("rate", when_used="json")
     def serialize_rate(self, rate: Decimal) -> float:
@@ -18,6 +22,7 @@ class ExchangeRateBase(BaseModel):
 
 
 class ExchangeRateCreate(ExchangeRateBase):
+    rate: InputRate
     base_currency_code: str
     target_currency_code: str
 
@@ -52,6 +57,8 @@ class ExchangeRate(ExchangeRateBase):
 
 
 class ExchangeRateUpdate(ExchangeRateBase):
+    rate: InputRate
+
     @classmethod
     def as_form(
         cls,
