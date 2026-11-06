@@ -39,7 +39,7 @@ make check                        # every CI check except e2e and docker: lint +
 make secrets                      # betterleaks over the whole git history (also a pre-push hook; the commit hook scans the staged diff)
 make vulns                        # osv-scanner on uv.lock against osv.dev (needs the network; also a pre-push hook and a weekly CI run)
 make lint                         # all pre-commit hooks on the whole repo; fails on findings (ruff hooks also autofix)
-make fix                          # safe autofixes only: ruff check --fix + ruff format
+make fix                          # safe autofixes only: ruff check --fix + ruff format + rumdl fmt
 make typecheck                    # mypy: strict everywhere, relaxed for tests/ (also a pre-push hook)
 make test                         # unit/integration tests (tests/ only)
 make test-cov                     # same + coverage (fails under 80%), HTML in tests/coverage/
@@ -54,6 +54,8 @@ On this Windows machine Playwright can't download Chromium (TLS interception), s
 Secrets: never commit a real one; config comes from `.env` (gitignored). A secret that reached a commit must be revoked, not just removed: it stays in history. For a false positive, add its fingerprint to `.betterleaksignore` with a comment saying why; don't disable the rule. Betterleaks' `--validation` (sending found secrets to live APIs) stays off.
 
 Vulnerabilities: fix a finding by upgrading the package (`uv lock --upgrade-package <pkg>`). If no fix exists or it doesn't apply, ignore that one advisory in `osv-scanner.toml` (`[[IgnoredVulns]]` with `id`, `reason` and `ignoreUntil` at most 3 months ahead), never the whole package.
+
+Docs and spelling: `make lint` also runs typos (spelling in code and docs), rumdl (Markdown, `.rumdl.toml`: prose is one line per paragraph, so line length applies only to headings) and agnix (`CLAUDE.md`, `AGENTS.md`). These three are dev dependencies in `uv.lock`, not pre-commit repos. A real word that typos flags goes into `_typos.toml` (`[default.extend-words]`) with a comment.
 
 `make check` must pass before a change is done. New checks go into it (usually as a pre-commit hook), never into CI alone. Pre-commit runs the fast hooks on staged files at commit and mypy at push; `uv run pre-commit install` sets up both.
 

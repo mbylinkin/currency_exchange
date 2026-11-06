@@ -32,6 +32,8 @@ jobs:
         with:
           path: ~/.cache/pre-commit
           key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
+          # A config change reuses the old cache and rebuilds only the changed hooks
+          restore-keys: pre-commit-
       # --locked fails if uv.lock is out of date with pyproject.toml
       - run: uv sync --locked
       - run: make check

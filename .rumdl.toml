@@ -1,0 +1,7 @@
+# Markdown lint (rumdl, markdownlint rules). `make lint` runs `rumdl check`.
+
+[MD013]
+# Prose is written one paragraph per line, never hard-wrapped, and code blocks
+# hold copyable commands; headings and blockquotes keep the 80-character limit.
+paragraphs = false
+code-blocks = false

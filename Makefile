@@ -74,6 +74,7 @@ vulns:
 fix:
 	uv run ruff check --fix .
 	uv run ruff format .
+	uv run rumdl fmt .
 
 
 # mypy --strict on src and e2e, relaxed for tests (config in pyproject.toml)
