@@ -1,5 +1,5 @@
 from collections.abc import Iterable, Mapping
-from typing import Any
+from typing import Any, cast
 
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
@@ -51,7 +51,8 @@ def format_validation_errors(errors: Iterable[Mapping[str, Any]]) -> str:
 
 
 async def http_exception_handler(request: Request, exc: Exception) -> JSONResponse:
-    assert isinstance(exc, StarletteHTTPException)
+    # Registered for StarletteHTTPException only; Starlette types it as Exception
+    exc = cast(StarletteHTTPException, exc)
     return JSONResponse(
         status_code=exc.status_code,
         content={"message": exc.detail},
@@ -62,7 +63,8 @@ async def http_exception_handler(request: Request, exc: Exception) -> JSONRespon
 async def validation_exception_handler(
     request: Request, exc: Exception
 ) -> JSONResponse:
-    assert isinstance(exc, RequestValidationError | ValidationError)
+    # Registered for these two only; Starlette types it as Exception
+    exc = cast(RequestValidationError | ValidationError, exc)
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
         content={"message": format_validation_errors(exc.errors())},
