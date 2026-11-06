@@ -55,6 +55,8 @@ Secrets: never commit a real one; config comes from `.env` (gitignored). A secre
 
 Vulnerabilities: fix a finding by upgrading the package (`uv lock --upgrade-package <pkg>`). If no fix exists or it doesn't apply, ignore that one advisory in `osv-scanner.toml` (`[[IgnoredVulns]]` with `id`, `reason` and `ignoreUntil` at most 3 months ahead), never the whole package.
 
+Dependencies: deptry (in `make lint`) fails when code imports a package that `pyproject.toml` doesn't declare (also a transitive one, like `starlette` through FastAPI), or when a declared one is never imported. `tests/` and `e2e/` may import dev dependencies. A package needed at runtime without an import (`python-multipart`) goes into `[tool.deptry.per_rule_ignores]` with a comment.
+
 Docs and spelling: `make lint` also runs typos (spelling in code and docs), rumdl (Markdown, `.rumdl.toml`: prose is one line per paragraph, so line length applies only to headings) and agnix (`CLAUDE.md`, `AGENTS.md`). These three are dev dependencies in `uv.lock`, not pre-commit repos. A real word that typos flags goes into `_typos.toml` (`[default.extend-words]`) with a comment.
 
 `make check` must pass before a change is done. New checks go into it (usually as a pre-commit hook), never into CI alone. Pre-commit runs the fast hooks on staged files at commit and mypy at push; `uv run pre-commit install` sets up both.

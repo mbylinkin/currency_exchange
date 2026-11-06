@@ -69,6 +69,13 @@ repos:
         entry: uv run agnix --strict
         language: system
         files: (^|/)(CLAUDE|AGENTS)\.md$
+    # Unused, missing and transitive dependencies (config in pyproject.toml)
+    -   id: deptry
+        name: deptry (dependencies)
+        entry: uv run deptry .
+        language: system
+        pass_filenames: false
+        files: (\.py|^pyproject\.toml|^uv\.lock)$
     -   id: mypy
         name: mypy
         entry: uv run mypy

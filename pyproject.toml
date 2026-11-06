@@ -11,12 +11,14 @@ dependencies = [
     "pydantic-settings>=2.16.2",
     "python-multipart>=0.0.32",
     "sqlalchemy>=2.1.6",
+    "starlette>=1.8.0",
     "uvicorn>=0.54.0",
 ]
 
 [dependency-groups]
 dev = [
     "agnix>=0.61.0",
+    "deptry>=0.25.1",
     "factory-boy>=3.3.3",
     "httpx2>=2.16.0",
     "mypy>=2.4.1",
@@ -90,3 +92,11 @@ ignore_missing_imports = true
 # factory_boy re-exports its API from submodules without __all__
 module = ["factory", "factory.*"]
 implicit_reexport = true
+
+[tool.deptry]
+# e2e/ is test code like tests/ (excluded by default): dev dependencies are fine there
+extend_exclude = ["e2e"]
+
+[tool.deptry.per_rule_ignores]
+# FastAPI needs python-multipart at runtime to parse Form(...) bodies; nothing imports it
+DEP002 = ["python-multipart"]
