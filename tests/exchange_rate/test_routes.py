@@ -1,8 +1,11 @@
+from decimal import Decimal
+
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
 from src import models
+from tests.factories import ExchangeRateFactory
 
 
 def test_add_exchange_rate(
@@ -212,6 +215,16 @@ def test_update_exchange_rate_missing_field(
     assert resp.json()["message"] == "Missing required field 'rate'"
 
 
+@pytest.mark.parametrize("rate", ["0", "-1", "abc", "1.0000001"])
+def test_update_exchange_rate_invalid_rate(
+    app_client: TestClient, create_exc_rate_usd_eur: models.ExchangeRates, rate: str
+) -> None:
+    resp = app_client.patch("/exchangeRate/USDEUR", data={"rate": rate})
+
+    assert resp.status_code == status.HTTP_400_BAD_REQUEST
+    assert resp.json()["message"].startswith("Invalid field 'rate'")
+
+
 def test_add_exchange_rate_already_exists(
     app_client: TestClient, create_exc_rate_usd_eur: models.ExchangeRates
 ) -> None:
@@ -265,3 +278,26 @@ def test_update_exchange_rate_case_insensitive(
 
     assert resp.status_code == status.HTTP_200_OK
     assert resp.json()["rate"] == 1.2
+
+
+@pytest.mark.parametrize("path", ["/exchangeRate/USDEUR", "/exchangeRates"])
+def test_stored_rate_outside_input_limits_is_returned(
+    app_client: TestClient,
+    create_currency_usd: models.Currency,
+    create_currency_eur: models.Currency,
+    path: str,
+) -> None:
+    # Written past the API; DECIMAL(10, 6) reads 0.0000004 back as 0. Input
+    # limits on the response schema used to turn this into a 500 (#62).
+    ExchangeRateFactory(
+        base_currency=create_currency_usd,
+        target_currency=create_currency_eur,
+        rate=Decimal("0.0000004"),
+    )
+
+    resp = app_client.get(path)
+
+    assert resp.status_code == status.HTTP_200_OK
+    body = resp.json()
+    rate = body["rate"] if isinstance(body, dict) else body[0]["rate"]
+    assert rate == 0
