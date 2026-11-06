@@ -145,7 +145,7 @@ Runs whitespace/YAML checks, ruff (lint + format), spelling (typos), Markdown li
 
 GitHub Actions run three jobs on every pull request:
 
-* `check`: `make check` (pre-commit hooks incl. hadolint for the Dockerfile, secrets scan of the git history, vulnerability scan of uv.lock, mypy, migration check, tests with coverage)
+* `check`: `make check` (pre-commit hooks incl. hadolint for the Dockerfile, secrets scan of the git history, vulnerability scan of uv.lock, mypy, migration check, tests with coverage: at least 80% overall and 90% of the lines the pull request changes)
 * `e2e`: the e2e tests, inside the official Playwright image (browsers preinstalled)
 * `docker`: builds the images, starts them with `docker compose`, adds a currency through the API and checks the frontend is served
 

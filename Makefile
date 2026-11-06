@@ -49,7 +49,7 @@ docker-down:
 
 # Every check that CI runs, except e2e and the docker smoke test.
 # Must pass before a change is done.
-check: lint secrets vulns typecheck check-migrations test-cov
+check: lint secrets vulns typecheck check-migrations test-cov diff-cover
 
 
 # All pre-commit hooks (hygiene + ruff) on the whole repo. Fails on any finding;
@@ -87,7 +87,13 @@ test:
 
 
 test-cov:
-	uv run pytest tests -v --cov=src --cov-report=html --cov-report=term
+	uv run pytest tests -v --cov=src --cov-report=html --cov-report=term --cov-report=xml
+
+
+# Lines this branch changes in src/ (vs origin/main) must be covered by tests.
+# Reads coverage.xml from test-cov; the 80% total floor stays in pyproject.toml.
+diff-cover:
+	uv run diff-cover coverage.xml --compare-branch=origin/main --fail-under=90
 
 
 test-e2e:
