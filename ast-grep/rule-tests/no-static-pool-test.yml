@@ -1,0 +1,7 @@
+id: no-static-pool
+valid:
+  - "engine = create_engine(url)"
+  - "# Never StaticPool here"
+invalid:
+  - "from sqlalchemy.pool import StaticPool"
+  - "engine = create_engine(url, poolclass=StaticPool)"

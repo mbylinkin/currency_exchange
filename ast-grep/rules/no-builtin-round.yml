@@ -1,0 +1,9 @@
+id: no-builtin-round
+language: python
+severity: error
+message: >-
+  round() on a Decimal is banker's rounding. Use utils.round_rate / round_amount (ROUND_HALF_UP).
+files:
+  - src/**/*.py
+rule:
+  pattern: round($$$)

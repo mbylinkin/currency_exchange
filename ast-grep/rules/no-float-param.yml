@@ -1,0 +1,12 @@
+id: no-float-param
+language: python
+severity: error
+message: >-
+  Parse numeric request parameters as Decimal, not float (FastAPI lets `inf` through for float).
+files:
+  - src/**/router.py
+rule:
+  kind: typed_default_parameter
+  has:
+    field: type
+    regex: ^float$

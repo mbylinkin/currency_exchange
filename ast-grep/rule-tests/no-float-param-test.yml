@@ -1,0 +1,9 @@
+id: no-float-param
+valid:
+  - |
+    def exchange(amount: Decimal = Query(gt=0)): ...
+  - |
+    def amount_float(cls, amount: Decimal) -> float: ...
+invalid:
+  - |
+    def exchange(amount: float = Query(gt=0)): ...

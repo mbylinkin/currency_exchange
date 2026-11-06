@@ -1,0 +1,9 @@
+id: no-loader-criteria
+valid:
+  - select(ExchangeRates).join(base, ExchangeRates.base_currency).where(base.code == code)
+  - select(A).options(joinedload(A.b))
+  - and_(a == 1, b == 2)
+invalid:
+  - select(A).options(joinedload(A.b.and_(B.code == code)))
+  - select(A).options(selectinload(A.b.and_(B.id > 1)))
+  - select(A).options(orm.contains_eager(A.b.and_(B.id > 1)))

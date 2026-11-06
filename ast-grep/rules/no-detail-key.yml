@@ -1,0 +1,12 @@
+id: no-detail-key
+language: python
+severity: error
+message: >-
+  Error responses are {"message": ...}; the spec and the frontend read `message`, never `detail`.
+files:
+  - src/**/*.py
+rule:
+  kind: pair
+  has:
+    field: key
+    regex: ^["']detail["']$

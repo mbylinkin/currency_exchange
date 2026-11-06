@@ -1,0 +1,13 @@
+id: no-loader-criteria
+language: python
+severity: error
+message: >-
+  Don't filter through loader options; eager loading must not decide which rows come back (#31). Use join + where.
+rule:
+  pattern: $REL.and_($$$)
+  inside:
+    stopBy: end
+    kind: call
+    has:
+      field: function
+      regex: (^|\.)(joinedload|selectinload|subqueryload|lazyload|contains_eager|defaultload)$

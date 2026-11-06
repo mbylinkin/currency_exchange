@@ -1,0 +1,6 @@
+# ast-grep: project rules that back conventions in CLAUDE.md.
+# `make lint` runs `ast-grep scan` and `ast-grep test` (the rules' own tests).
+ruleDirs:
+  - ast-grep/rules
+testConfigs:
+  - testDir: ast-grep/rule-tests

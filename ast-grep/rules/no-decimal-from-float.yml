@@ -1,0 +1,19 @@
+id: no-decimal-from-float
+language: python
+severity: error
+message: >-
+  Decimal built from a float carries the float's binary error. Build it from a str or int.
+note: >-
+  Money is Decimal end to end (CLAUDE.md). Decimal("0.1"), not Decimal(0.1).
+rule:
+  any:
+    - pattern: Decimal($ARG)
+    - pattern: decimal.Decimal($ARG)
+constraints:
+  ARG:
+    any:
+      - kind: float
+      - pattern: float($$$)
+      - kind: unary_operator
+        has:
+          kind: float
