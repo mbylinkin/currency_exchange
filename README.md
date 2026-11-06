@@ -6,11 +6,12 @@ The implementation does not include a web interface. The spec's [reference front
 
 [Project specification](https://zhukovsd.github.io/python-backend-learning-course/projects/currency-exchange/)
 
-### Why FastAPI
+## Why FastAPI
 
 The spec asks for plain `http.server` and `sqlite3`, without frameworks. This project uses FastAPI and SQLAlchemy on purpose, to practice using them. Everything else follows the spec: routes, status codes, form input, the response format and the conversion rules.
 
 ## Motivation
+
 * Learn MVC Pattern
 * Learn REST API
 * Use FastAPI to build a REST API following [fastapi best practices](https://github.com/zhanymkanov/fastapi-best-practices#dependencies) and [fastapi production template](https://github.com/zhanymkanov/fastapi_production_template/blob/main/src/config.py)
@@ -36,7 +37,7 @@ The spec asks for plain `http.server` and `sqlite3`, without frameworks. This pr
 * `/exchange` uses the direct rate A→B if it exists, otherwise the inverse of B→A, otherwise the cross rate through USD.
 * Every error is `{"message": "..."}` with the status code from the spec: 400 for a missing or invalid field, 404 when nothing is found, 409 for a duplicate, 500 for a server error.
 
-Interactive docs (Swagger UI) are at http://localhost:8000/docs, but only when `APP_ENVIRONMENT` is `LOCAL`, `TESTING` or `STAGING`. `.env.example` sets `LOCAL`. The default is `PRODUCTION`, which hides the docs, and the Docker image uses the default.
+Interactive docs (Swagger UI) are at <http://localhost:8000/docs>, but only when `APP_ENVIRONMENT` is `LOCAL`, `TESTING` or `STAGING`. `.env.example` sets `LOCAL`. The default is `PRODUCTION`, which hides the docs, and the Docker image uses the default.
 
 ## Getting started
 
@@ -45,6 +46,7 @@ Interactive docs (Swagger UI) are at http://localhost:8000/docs, but only when `
 ```bash
 cp .env.example .env
 ```
+
 Creates .env file from .env.example
 
 ### Install dependencies
@@ -54,6 +56,7 @@ Requires [uv](https://docs.astral.sh/uv/). uv installs Python 3.14 itself if it'
 ```bash
 make install    # or: uv sync
 ```
+
 Creates `.venv` with the app and dev dependencies, pinned in `uv.lock`. Use `uv add <pkg>` (or `uv add --dev <pkg>`) to add a dependency. All `make` targets run through `uv run`, so there is no need to activate the venv.
 
 ### Run server
@@ -61,7 +64,9 @@ Creates `.venv` with the app and dev dependencies, pinned in `uv.lock`. Use `uv 
 ```bash
 make run-dev
 ```
+
 This command:
+
 * creates database if it doesn't exist
 * applies migrations (`make migrate`), so tables are created or updated
 * starts web application server with `APP_DEBUG=true`: it reloads on code changes and logs every SQL query to the console
@@ -70,8 +75,8 @@ This command:
 
 ### Use application
 
-* Server available at http://127.0.0.1:8000
-* To click through the reference frontend, run `make frontend` in another terminal and open http://localhost:8080
+* Server available at <http://127.0.0.1:8000>
+* To click through the reference frontend, run `make frontend` in another terminal and open <http://localhost:8080>
 
 ## Docker
 
@@ -82,8 +87,8 @@ make docker-up      # docker compose up --build --detach --wait
 make docker-down    # stop and remove the containers
 ```
 
-* API: http://localhost:8000. Migrations are applied on start.
-* Reference frontend: http://localhost:8080
+* API: <http://localhost:8000>. Migrations are applied on start.
+* Reference frontend: <http://localhost:8080>
 * The SQLite database lives in the `data` volume, so it survives `docker-down`. `docker compose down -v` deletes it.
 
 ## Tests
@@ -91,15 +96,18 @@ make docker-down    # stop and remove the containers
 All tests are integration tests: they call the API through FastAPI's `TestClient` and use a real SQLite database (`test.db`).
 
 To run tests use
+
 ```bash
 make test
 ```
 
 To run tests with coverage use
+
 ```bash
 make test-cov
 ```
-After running tests with coverage report will be available at [tests/coverage/index.html](tests/coverage/index.html)
+
+After running tests with coverage, the HTML report is in `tests/coverage/index.html`
 
 ### End-to-end tests
 
@@ -117,7 +125,7 @@ To use an already installed browser instead of the downloaded Chromium, run `mak
 ```bash
 make check              # everything CI checks except e2e and docker (needs Docker running for hadolint)
 make lint               # pre-commit hooks (whitespace/YAML, ruff) on all files
-make fix                # ruff autofix + format
+make fix                # ruff autofix + format, Markdown format
 make secrets            # scan the git history for committed secrets (betterleaks)
 make vulns              # known vulnerabilities in uv.lock (osv-scanner)
 make typecheck          # mypy (strict)
@@ -131,11 +139,12 @@ uv run alembic revision --autogenerate -m "message"   # new migration after chan
 uv run pre-commit install
 ```
 
-Runs whitespace/YAML checks and ruff (lint + format) on every commit, and mypy on every push.
+Runs whitespace/YAML checks, ruff (lint + format), spelling (typos), Markdown lint (rumdl), agent-instruction lint (agnix), the workflow linter and hadolint on every commit, and mypy, the secrets scan of the git history and the vulnerability scan on every push.
 
 ### CI
 
 GitHub Actions run three jobs on every pull request:
+
 * `check`: `make check` (pre-commit hooks incl. hadolint for the Dockerfile, secrets scan of the git history, vulnerability scan of uv.lock, mypy, migration check, tests with coverage)
 * `e2e`: `make test-e2e`
 * `docker`: builds the images, starts them with `docker compose`, adds a currency through the API and checks the frontend is served

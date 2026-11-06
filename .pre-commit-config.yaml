@@ -53,6 +53,22 @@ repos:
         entry: ghcr.io/hadolint/hadolint:v2.15.1@sha256:32dac94127fd60b7b7e3fbfc65e1383b9b5e25c9bfd7b8536de7a539fe68a12d hadolint
 -   repo: local
     hooks:
+    # typos, rumdl and agnix are dev dependencies: versions live in uv.lock
+    -   id: typos
+        name: typos (spelling)
+        entry: uv run typos --force-exclude
+        language: system
+        types: [text]
+    -   id: rumdl
+        name: rumdl (Markdown lint, config in .rumdl.toml)
+        entry: uv run rumdl check
+        language: system
+        types: [markdown]
+    -   id: agnix
+        name: agnix (agent instruction files)
+        entry: uv run agnix --strict
+        language: system
+        files: (^|/)(CLAUDE|AGENTS)\.md$
     -   id: mypy
         name: mypy
         entry: uv run mypy
