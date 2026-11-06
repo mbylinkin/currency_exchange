@@ -40,5 +40,5 @@ def create_currency(
 ) -> models.Currency:
     try:
         return add_currency(currency_data)
-    except AlreadyExists:
-        raise exceptions.CurrencyAlreadyExists()
+    except AlreadyExists as err:
+        raise exceptions.CurrencyAlreadyExists() from err

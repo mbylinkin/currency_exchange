@@ -64,8 +64,8 @@ def upd_one[T](item: T) -> T:
             session.add(item)
             session.commit()
             session.refresh(item)
-        except exc.IntegrityError:
+        except exc.IntegrityError as err:
             session.rollback()
-            raise AlreadyExists
+            raise AlreadyExists from err
 
     return item

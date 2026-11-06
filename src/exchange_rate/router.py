@@ -45,8 +45,8 @@ def create_exchange_rate(
 ) -> models.ExchangeRates:
     try:
         return add_exc_rate(exchange_rate_data)
-    except AlreadyExists:
-        raise exceptions.ExcRateAlreadyExists()
+    except AlreadyExists as err:
+        raise exceptions.ExcRateAlreadyExists() from err
 
 
 @router.patch(
