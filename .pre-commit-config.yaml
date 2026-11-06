@@ -44,6 +44,13 @@ repos:
     -   id: osv-scanner
         args: [scan, source, --lockfile=uv.lock]
         stages: [pre-push, manual]
+-   repo: https://github.com/hadolint/hadolint
+    rev: v2.15.1
+    hooks:
+    # Runs in Docker: the image is pinned by digest, so keep tag and digest in
+    # sync with rev. Needs a running Docker daemon (Docker Desktop on Windows).
+    -   id: hadolint-docker
+        entry: ghcr.io/hadolint/hadolint:v2.15.1@sha256:32dac94127fd60b7b7e3fbfc65e1383b9b5e25c9bfd7b8536de7a539fe68a12d hadolint
 -   repo: local
     hooks:
     -   id: mypy

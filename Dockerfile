@@ -15,6 +15,9 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 
 FROM python:3.14-slim AS frontend-fetch
+# DL3008: Debian drops old package versions from its archive, so pinned apt
+# versions break the build. Build-only stage; the base image is pinned instead.
+# hadolint ignore=DL3008
 RUN apt-get update \
     && apt-get install -y --no-install-recommends git ca-certificates \
     && rm -rf /var/lib/apt/lists/*
@@ -24,10 +27,10 @@ RUN python e2e/frontend.py --fetch-only && rm -rf e2e/frontend/.git
 
 
 FROM python:3.14-slim AS frontend
-RUN useradd --create-home app
+RUN useradd --uid 1000 --create-home app
 WORKDIR /app
 COPY --from=frontend-fetch /app/e2e ./e2e
-USER app
+USER 1000
 EXPOSE 8080
 # The frontend was downloaded at build time. --api-url is the API as the
 # browser sees it, so it stays on localhost even inside compose.
@@ -35,7 +38,9 @@ CMD ["python", "e2e/frontend.py", "--no-fetch", "--host", "0.0.0.0", "--port", "
 
 
 FROM python:3.14-slim AS api
-RUN useradd --create-home app && mkdir /data && chown app /data
+# uid 1000 is what useradd assigned before it was explicit: existing /data
+# volumes stay writable
+RUN useradd --uid 1000 --create-home app && mkdir /data && chown app /data
 WORKDIR /app
 COPY --from=builder /app/.venv ./.venv
 COPY alembic.ini run.py ./
@@ -48,7 +53,7 @@ ENV PATH=/app/.venv/bin:$PATH \
     APP_DATABASE_URL=sqlite:////data/currency_exchange.db \
     APP_CORS_ORIGINS='["http://localhost:8080"]' \
     APP_CORS_HEADERS='["*"]'
-USER app
+USER 1000
 VOLUME /data
 EXPOSE 8000
 HEALTHCHECK --interval=10s --timeout=3s --start-period=10s \
