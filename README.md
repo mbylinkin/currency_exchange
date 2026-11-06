@@ -107,7 +107,7 @@ To run tests with coverage use
 make test-cov
 ```
 
-After running tests with coverage report will be available at [tests/coverage/index.html](tests/coverage/index.html)
+After running tests with coverage, the HTML report is in `tests/coverage/index.html`
 
 ### End-to-end tests
 
