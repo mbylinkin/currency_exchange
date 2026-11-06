@@ -82,6 +82,12 @@ openapi:
 	uv run python scripts/openapi.py
 
 
+# Broken links in Markdown (lychee in Docker, needs the network). Not part of
+# check: external sites are flaky. Runs weekly in CI.
+links:
+	uv run pre-commit run lychee-docker --all-files --hook-stage manual
+
+
 # Safe autofixes only
 fix:
 	uv run ruff check --fix .
