@@ -21,7 +21,7 @@ uv lock --upgrade-package <pkg>
 
 Ruff's target version comes from `requires-python`. FastAPI's `Depends`/`Query`/`Form` defaults are whitelisted for bugbear B008 in `[tool.ruff.lint.flake8-bugbear]`. `alembic` is declared `known-third-party` for isort, because the local `alembic/` directory would otherwise make it first-party. After bumping ruff, set the same version as `rev` of `ruff-pre-commit` in `.pre-commit-config.yaml` (`pre-commit autoupdate` does it).
 
-Dependabot (`.github/dependabot.yml`) opens weekly PRs for `uv.lock`, the Dockerfile base images and GitHub Actions. Minor and patch bumps come grouped into one PR, each major bump gets its own. A 7-day `cooldown` skips freshly published versions. Minor bumps of the `python` image are ignored: a new Python goes into `.python-version`, `requires-python` and the Dockerfile together, by hand. Dependabot doesn't update `.pre-commit-config.yaml`, so when its PR bumps ruff, push `pre-commit autoupdate` onto the same branch.
+Dependabot (`.github/dependabot.yml`) opens weekly PRs for `uv.lock`, the Dockerfile base images and GitHub Actions. Minor and patch bumps come grouped into one PR, each major bump gets its own. A 7-day `cooldown` skips freshly published versions. Minor bumps of the `python` image are ignored: a new Python goes into `.python-version`, `requires-python` and the Dockerfile together, by hand. Dependabot doesn't update `.pre-commit-config.yaml`, so when its PR bumps ruff, push `pre-commit autoupdate` onto the same branch. When it bumps `playwright`, also set the e2e container image in `ci.yml` to the same version (new tag and digest): the e2e job's first step fails until they match.
 
 ```bash
 make install                            # uv sync: .venv with app + dev deps
@@ -49,7 +49,7 @@ uv run pytest tests/exchange/test_routes.py::test_exchange_currency_direct   # s
 uv run alembic revision --autogenerate -m "msg"                              # new migration after changing models.py (post-write hooks in alembic.ini run ruff on it)
 ```
 
-On this Windows machine Playwright can't download Chromium (TLS interception), so run e2e on the installed Edge: `make test-e2e E2E_ARGS="--browser-channel msedge"`. CI uses the downloaded Chromium.
+On this Windows machine Playwright can't download Chromium (TLS interception), so run e2e on the installed Edge: `make test-e2e E2E_ARGS="--browser-channel msedge"`. CI runs e2e inside the official Playwright image (`mcr.microsoft.com/playwright/python`, pinned by digest in `ci.yml`), which already has the browsers and their system packages.
 
 Secrets: never commit a real one; config comes from `.env` (gitignored). A secret that reached a commit must be revoked, not just removed: it stays in history. For a false positive, add its fingerprint to `.betterleaksignore` with a comment saying why; don't disable the rule. Betterleaks' `--validation` (sending found secrets to live APIs) stays off.
 

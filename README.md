@@ -146,7 +146,7 @@ Runs whitespace/YAML checks, ruff (lint + format), spelling (typos), Markdown li
 GitHub Actions run three jobs on every pull request:
 
 * `check`: `make check` (pre-commit hooks incl. hadolint for the Dockerfile, secrets scan of the git history, vulnerability scan of uv.lock, mypy, migration check, tests with coverage)
-* `e2e`: `make test-e2e`
+* `e2e`: the e2e tests, inside the official Playwright image (browsers preinstalled)
 * `docker`: builds the images, starts them with `docker compose`, adds a currency through the API and checks the frontend is served
 
 A scheduled workflow runs `make vulns` every Monday, so a newly published advisory shows up even without new commits.

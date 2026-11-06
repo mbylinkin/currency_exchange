@@ -41,14 +41,27 @@ jobs:
   e2e:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    # Browsers and their system packages come preinstalled, instead of
+    # `playwright install --with-deps`, whose apt step sometimes took ~9 min.
+    # Keep the tag equal to playwright in uv.lock (the first step checks it).
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.64.1-noble@sha256:330d401ae23c905896a0c26c66c36fc971b621519e7b11b435a8328d7bf6e031
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
           enable-cache: true
       - run: uv sync --locked
-      - run: uv run playwright install --with-deps chromium
-      - run: make test-e2e E2E_ARGS="--screenshot only-on-failure --tracing retain-on-failure --output test-results"
+      - name: Image has the browsers that playwright in uv.lock expects
+        shell: bash
+        run: |
+          dirs=$(uv run playwright install --dry-run chromium | awk '/Install location:/ {print $3}')
+          [ -n "$dirs" ] || { echo "::error::no install locations in playwright install --dry-run output"; exit 1; }
+          for dir in $dirs; do
+            [ -d "$dir" ] || { echo "::error::$dir is missing: set the image in ci.yml to playwright $(uv run playwright --version | awk '{print $2}')"; exit 1; }
+          done
+      # = make test-e2e; the image has no make
+      - run: uv run pytest e2e --screenshot only-on-failure --tracing retain-on-failure --output test-results
       - if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
