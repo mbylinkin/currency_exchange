@@ -87,7 +87,7 @@ extend-immutable-calls = [
 ]
 
 [tool.mypy]
-files = ["src", "tests", "e2e", "alembic", "run.py"]
+files = ["src", "tests", "e2e", "alembic", "scripts", "run.py"]
 plugins = ["pydantic.mypy"]
 strict = true
 
