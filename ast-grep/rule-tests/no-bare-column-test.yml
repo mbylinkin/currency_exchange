@@ -1,0 +1,7 @@
+id: no-bare-column
+valid:
+  - "code: Mapped[str] = mapped_column(String(3), unique=True)"
+  - "name: Mapped[str | None] = mapped_column()"
+invalid:
+  - "code = Column(String(3))"
+  - "code = sa.Column(sa.String(3), nullable=False)"

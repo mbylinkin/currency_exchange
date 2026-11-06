@@ -83,6 +83,19 @@ repos:
         language: system
         pass_filenames: false
         files: (^src/.*\.py|^pyproject\.toml)$
+    # Project rules from CLAUDE.md (sgconfig.yml, ast-grep/rules), and the rules' own tests
+    -   id: ast-grep
+        name: ast-grep (project rules)
+        entry: uv run ast-grep scan
+        language: system
+        pass_filenames: false
+        files: (\.py|^ast-grep/.*|^sgconfig\.yml)$
+    -   id: ast-grep-test
+        name: ast-grep (rule tests)
+        entry: uv run ast-grep test --skip-snapshot-tests
+        language: system
+        pass_filenames: false
+        files: ^(ast-grep/.*|sgconfig\.yml)$
     -   id: mypy
         name: mypy
         entry: uv run mypy

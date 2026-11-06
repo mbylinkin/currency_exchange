@@ -1,0 +1,11 @@
+id: no-bare-column
+language: python
+severity: error
+message: >-
+  Declare columns as `name: Mapped[T] = mapped_column(...)`; the annotation decides NOT NULL / nullable.
+files:
+  - src/**/*.py
+rule:
+  any:
+    - pattern: Column($$$)
+    - pattern: $MOD.Column($$$)

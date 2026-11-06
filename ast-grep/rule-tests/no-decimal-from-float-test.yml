@@ -1,0 +1,11 @@
+id: no-decimal-from-float
+valid:
+  - Decimal("0.1")
+  - Decimal(1)
+  - Decimal(rate_str)
+  - Decimal(1).scaleb(-2)
+invalid:
+  - Decimal(0.1)
+  - Decimal(-1.5)
+  - decimal.Decimal(2.0)
+  - Decimal(float(value))

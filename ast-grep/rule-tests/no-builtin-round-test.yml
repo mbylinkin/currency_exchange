@@ -1,0 +1,8 @@
+id: no-builtin-round
+valid:
+  - round_amount(amount)
+  - utils.round_rate(rate)
+  - amount.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+invalid:
+  - round(amount, 2)
+  - round(rate)

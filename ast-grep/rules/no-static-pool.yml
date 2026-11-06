@@ -1,0 +1,13 @@
+id: no-static-pool
+language: python
+severity: error
+message: >-
+  StaticPool shares one SQLite connection between request threads; concurrent requests crash the process (#29).
+files:
+  - src/**/*.py
+rule:
+  kind: identifier
+  regex: ^StaticPool$
+  not:
+    inside:
+      kind: comment
