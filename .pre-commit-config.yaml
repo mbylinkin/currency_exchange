@@ -76,6 +76,13 @@ repos:
         language: system
         pass_filenames: false
         files: (\.py|^pyproject\.toml|^uv\.lock)$
+    # Architecture contracts in [tool.importlinter] (pyproject.toml)
+    -   id: import-linter
+        name: import-linter (layers)
+        entry: uv run lint-imports
+        language: system
+        pass_filenames: false
+        files: (^src/.*\.py|^pyproject\.toml)$
     -   id: mypy
         name: mypy
         entry: uv run mypy
